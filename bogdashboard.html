@@ -1,0 +1,2508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sofie's Book Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #064e3b;
+            --accent: #059669;
+            --accent-light: #d1fae5;
+            --bg: #f0fdf4;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --text: #1f2937;
+            
+            --badge-blue: #3b82f6;
+            --badge-amber: #f59e0b;
+            --badge-violet: #8b5cf6;
+            --badge-pink: #ec4899;
+            --badge-gray: #6b7280;
+            --badge-orange: #f97316;
+            --badge-indigo: #6366f1;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tab-bar {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            gap: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: var(--gray-50);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: var(--gray-100);
+        }
+
+        .tab-button.active {
+            background: var(--white);
+            border-bottom-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        /* === TAB 1: OVERVIEW === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid var(--accent);
+        }
+
+        .stat-card .label {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card .value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-container {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .bar-item {
+            margin-bottom: 1rem;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .bar-track {
+            background: var(--gray-200);
+            border-radius: 4px;
+            height: 24px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem;
+            color: var(--white);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Currently Reading section */
+        .currently-reading-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .currently-reading-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .currently-reading-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .cr-card {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--accent);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .cr-card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .cr-card-author {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+
+        .cr-card-meta {
+            font-size: 0.8rem;
+            color: var(--gray-400);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cr-card-duration {
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .cr-card-actions {
+            margin-top: 0.5rem;
+        }
+
+        .btn-finished {
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-finished:hover {
+            background: var(--primary);
+        }
+
+        .btn-finished:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cr-empty {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray-400);
+            font-style: italic;
+        }
+
+        /* Rating Dialog */
+        .rating-dialog-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .rating-dialog {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .rating-dialog h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .rating-dialog-sub {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .rating-dialog-stars {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-star {
+            font-size: 2.5rem;
+            color: var(--gray-300);
+            cursor: pointer;
+            transition: color 0.15s, transform 0.15s;
+        }
+
+        .rating-star:hover,
+        .rating-star.selected {
+            color: #f59e0b;
+            transform: scale(1.15);
+        }
+
+        .rating-dialog-selected {
+            color: var(--gray-400);
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .rating-dialog-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        /* TBR Picker */
+        .tbr-picker-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .tbr-picker-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-pick-random {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-pick-random:hover {
+            background: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .tbr-count {
+            color: var(--gray-400);
+            font-size: 0.9rem;
+        }
+
+        .tbr-pick-card {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+            padding: 1.5rem;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tbr-pick-card.tbr-pick-animate {
+            animation: tbrReveal 0.4s ease-out;
+        }
+
+        @keyframes tbrReveal {
+            0% { opacity: 0; transform: translateY(10px) scale(0.97); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .tbr-pick-actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-start-reading {
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-start-reading:hover {
+            background: var(--primary);
+        }
+
+        .btn-pick-again {
+            background: transparent;
+            color: var(--gray-500);
+            border: 1px solid var(--gray-300);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-pick-again:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .recently-read {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .recently-read h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .recently-read-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .recently-read-table th {
+            background: var(--gray-50);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .recently-read-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        /* === TAB 2: ALL BOOKS === */
+        .search-filter-section {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .filter-button {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-300);
+            background: var(--white);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .filter-button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filter-button.active {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+
+        .books-table-wrapper {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .books-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .books-table thead {
+            position: sticky;
+            top: 56px;
+            background: var(--gray-50);
+            z-index: 10;
+        }
+
+        .books-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-200);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .books-table th:hover {
+            background: var(--gray-100);
+        }
+
+        .books-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .books-table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .stars {
+            color: #fbbf24;
+            letter-spacing: 0.1em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .badge-kindle { background: rgba(59, 130, 246, 0.1); color: var(--badge-blue); }
+        .badge-physical { background: rgba(245, 158, 11, 0.1); color: var(--badge-amber); }
+        .badge-mofibo { background: rgba(139, 92, 246, 0.1); color: var(--badge-violet); }
+        .badge-ao3 { background: rgba(236, 72, 153, 0.1); color: var(--badge-pink); }
+        .badge-apple { background: rgba(107, 114, 128, 0.1); color: var(--badge-gray); }
+        .badge-saxo { background: rgba(249, 115, 22, 0.1); color: var(--badge-orange); }
+        .badge-audiobook { background: rgba(99, 102, 241, 0.1); color: var(--badge-indigo); }
+        .badge-unknown { background: rgba(107, 114, 128, 0.1); color: var(--badge-gray); }
+
+        .badge-owned { background: rgba(5, 150, 105, 0.1); color: var(--accent); }
+        .badge-streamed { background: rgba(99, 102, 241, 0.1); color: var(--badge-indigo); }
+        .badge-borrowed { background: rgba(245, 158, 11, 0.1); color: var(--badge-amber); }
+        .badge-free { background: rgba(107, 114, 128, 0.1); color: var(--badge-gray); }
+
+        .badge-tag { background: rgba(5, 150, 105, 0.1); color: var(--accent); font-size: 0.75rem; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            background: var(--white);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+
+        /* === TAB 3: STATISTICS === */
+        .stats-hero {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            border-top: 4px solid var(--accent);
+        }
+
+        .stats-hero h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .stats-totals {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-totals .stat-card {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem;
+            border-top-width: 3px;
+        }
+
+        .stats-totals .stat-card .value {
+            font-size: 1.5rem;
+        }
+
+        .stats-totals .stat-card .label {
+            font-size: 0.75rem;
+        }
+
+        .stats-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-panel {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-panel h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        /* Reading Speed */
+        .speed-big { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1.25rem; }
+        .speed-big .speed-value { font-size: 2.2rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .speed-big .speed-unit { font-size: 0.85rem; color: var(--gray-400); }
+        .speed-records { display: flex; flex-direction: column; gap: 0.75rem; }
+        .speed-record { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 0.82rem; }
+        .speed-record-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+        .speed-record-info { display: flex; flex-direction: column; }
+        .speed-record-title { color: var(--gray-700); font-weight: 500; }
+        .speed-record-meta { color: var(--gray-400); font-size: 0.75rem; }
+
+        .pace-numbers {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pace-stat { text-align: center; }
+
+        .pace-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .pace-label {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .pace-progress {
+            margin-top: 0.5rem;
+        }
+
+        .journey-grid { display: flex; flex-direction: column; gap: 3px; }
+        .journey-row { display: flex; align-items: center; gap: 0; }
+        .journey-month-label { width: 32px; font-weight: 500; font-size: 0.72rem; color: var(--gray-500); text-align: right; padding-right: 6px; flex-shrink: 0; }
+        .journey-year-headers { display: flex; gap: 3px; padding-left: 35px; margin-bottom: 4px; }
+        .journey-year-header { width: 36px; text-align: center; font-size: 0.72rem; color: var(--gray-500); font-weight: 600; }
+        .journey-cells { display: flex; gap: 3px; }
+        .journey-cell { width: 36px; height: 22px; border-radius: 4px; cursor: default; transition: outline 0.12s, transform 0.12s; position: relative; }
+        .journey-cell:hover { outline: 2px solid var(--accent); outline-offset: 1px; transform: scale(1.15); z-index: 2; }
+        .journey-cell-0 { background: var(--gray-100); }
+        .journey-cell-1 { background: #d1fae5; }
+        .journey-cell-2 { background: #6ee7b7; }
+        .journey-cell-3 { background: #34d399; }
+        .journey-cell-4 { background: #059669; }
+        .journey-cell-5 { background: #064e3b; }
+        .journey-tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--gray-900); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.72rem; line-height: 1.4; white-space: nowrap; z-index: 100; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+        .journey-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--gray-900); }
+        .journey-cell:hover .journey-tooltip { display: block; }
+        .journey-scale { display: flex; align-items: center; gap: 4px; margin-top: 0.75rem; justify-content: flex-end; font-size: 0.7rem; color: var(--gray-400); }
+        .journey-scale-cell { width: 14px; height: 14px; border-radius: 3px; }
+
+        @media (max-width: 768px) {
+            .stats-two-col { grid-template-columns: 1fr; }
+            .stats-totals { gap: 0.5rem; }
+            .stats-totals .stat-card { min-width: 90px; padding: 0.75rem; }
+            .stats-totals .stat-card .value { font-size: 1.25rem; }
+            .pace-numbers { gap: 1.5rem; }
+            .pace-num { font-size: 2rem; }
+        }
+
+        /* === TAB 4: BULK EDIT === */
+        .bulk-controls {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .bulk-search {
+            margin-bottom: 1rem;
+        }
+
+        .bulk-search input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 1rem;
+        }
+
+        .bulk-filter-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .bulk-filter-row select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background: var(--primary);
+        }
+
+        .bulk-table-wrapper {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: auto;
+        }
+
+        .bulk-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .bulk-table thead {
+            position: sticky;
+            top: 56px;
+            background: var(--gray-50);
+            z-index: 10;
+        }
+
+        .bulk-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .bulk-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .bulk-table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Editable cell styling */
+        .bulk-cell-format,
+        .bulk-cell-ownership,
+        .bulk-cell-rating {
+            position: relative;
+        }
+
+        .bulk-cell-format select,
+        .bulk-cell-ownership select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.25rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        .star-rating .star {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .star-rating .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star-rating .star.filled {
+            color: #fbbf24;
+        }
+
+        .star-rating .star.empty {
+            color: var(--gray-300);
+        }
+
+        /* Platform dropdown */
+        .platform-dropdown-toggle {
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            width: 100%;
+            text-align: left;
+        }
+
+        .platform-dropdown-menu {
+            position: absolute;
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 200;
+            min-width: 250px;
+            top: 100%;
+            left: 0;
+            margin-top: 0.25rem;
+        }
+
+        .platform-dropdown-menu label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .platform-dropdown-menu label:hover {
+            background: var(--gray-50);
+        }
+
+        .platform-dropdown-menu input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--accent);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .save-indicator {
+            display: inline-block;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header { padding: 1.25rem 1rem; }
+            .header h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+            .header p { font-size: 0.8rem; }
+            .header-actions { gap: 0.5rem; }
+            .header-btn { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+
+            .tab-button { padding: 0.7rem 0.25rem; font-size: 0.8rem; }
+
+            .container { padding: 0.75rem; }
+
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .charts-section { grid-template-columns: 1fr; }
+
+            /* Books table: horizontal scroll */
+            .books-table, .recently-read-table { font-size: 0.8rem; }
+            .books-table th, .books-table td,
+            .recently-read-table th, .recently-read-table td { padding: 0.4rem; }
+
+            .filter-buttons { gap: 0.25rem; }
+            .filter-button { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+
+            /* Reading Journey heatmap: scroll horizontally if many years */
+            .journey-year-headers, .journey-row { overflow-x: auto; }
+            .journey-cell { width: 28px; height: 20px; min-width: 28px; }
+            .journey-year-header { width: 31px; min-width: 31px; font-size: 0.65rem; }
+
+            /* Reading Speed */
+            .speed-big .speed-value { font-size: 1.75rem; }
+
+            /* Currently reading / TBR cards */
+            .cr-cards { flex-direction: column; }
+
+            /* Modals */
+            .modal { padding: 1.25rem; width: 100%; }
+        }
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 560px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        .modal-form { display: flex; flex-direction: column; gap: 1rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--gray-500); }
+        .form-group input, .form-group select {
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+        }
+        .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
+        .btn-cancel {
+            padding: 0.6rem 1.5rem;
+            border: 1px solid var(--gray-300);
+            background: var(--white);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+        }
+        .btn-save {
+            padding: 0.6rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+        }
+        .btn-save:hover { background: var(--primary); }
+        .btn-delete {
+            padding: 0.6rem 1.5rem;
+            background: transparent;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { background: #dc2626; color: white; }
+
+        /* Header buttons */
+        .header-actions { display: flex; gap: 0.75rem; margin-top: 0.75rem; }
+        .header-btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            border: 1.5px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .header-btn:hover { background: rgba(255,255,255,0.25); }
+
+        /* Platform checkboxes in modal */
+        .platform-checks { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .platform-checks label {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.85rem; cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .platform-checks label:has(input:checked) {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        /* Import area */
+        .import-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .import-area:hover, .import-area.dragover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .import-area p { color: var(--gray-500); margin-top: 0.5rem; font-size: 0.85rem; }
+    </style>
+
+</head>
+<body>
+    <div class="header">
+        <h1>Sofie's Book Dashboard</h1>
+        <p>Track your reading journey across all platforms</p>
+        <div class="header-actions">
+            <button class="header-btn" onclick="openAddBookModal()">+ Add Book</button>
+
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
+        <button class="tab-button" onclick="switchTab('books')">All Books</button>
+        <button class="tab-button" onclick="switchTab('stats')">Statistics</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB 1: OVERVIEW -->
+        <div id="overview" class="tab-content active">
+            <div class="currently-reading-section" id="currentlyReadingSection"></div>
+            <div class="tbr-picker-section" id="tbrPickerSection"></div>
+        </div>
+
+        <!-- TAB 2: ALL BOOKS -->
+        <div id="books" class="tab-content">
+            <div class="search-filter-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by title or author..." oninput="currentPage.books=1; applyFilters(); renderBooksTable(); renderBooksPagination();">
+                </div>
+                <div class="filter-group">
+                    <label>Platform</label>
+                    <div class="filter-buttons" id="platformFilters"></div>
+                </div>
+                <div class="filter-group">
+                    <label>Rating</label>
+                    <div class="filter-buttons" id="ratingFilters"></div>
+                </div>
+                <div class="filter-group">
+                    <label>Quick Filter</label>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                        <select id="quickFilter" onchange="currentPage.books=1; applyFilters(); renderBooksTable(); renderBooksPagination();" style="padding:0.4rem 0.75rem; border:1px solid var(--gray-300); border-radius:6px; font-family:'DM Sans',sans-serif;">
+                            <option value="all">All Books</option>
+                            <option value="missing-platform">Missing Platform</option>
+                            <option value="missing-ownership">Missing Ownership</option>
+                            <option value="unrated">Unrated</option>
+                            <option value="to-read">TBR</option>
+                            <option value="currently-reading">Currently Reading</option>
+                        </select>
+                        <select id="tagFilter" onchange="currentPage.books=1; applyFilters(); renderBooksTable(); renderBooksPagination();" style="padding:0.4rem 0.75rem; border:1px solid var(--gray-300); border-radius:6px; font-family:'DM Sans',sans-serif;">
+                            <option value="all">All Tags</option>
+                            <option value="Dramione">Dramione</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Krimi">Krimi</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Fanfiction">Fanfiction</option>
+                            <option value="Klassiker">Klassiker</option>
+                            <option value="Literary Fiction">Literary Fiction</option>
+                            <option value="none">No Tag</option>
+                        </select>
+                        <button onclick="exportBackup()" style="padding:0.4rem 0.75rem; border:1px solid var(--gray-300); border-radius:6px; background:var(--white); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem;">Export Backup</button>
+                    </div>
+                </div>
+            </div>
+            <div class="books-table-wrapper" style="overflow:visible;">
+                <table class="books-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortBooksTable('title')" style="cursor: pointer;">Title</th>
+                            <th onclick="sortBooksTable('author')" style="cursor: pointer;">Author</th>
+                            <th onclick="sortBooksTable('my_rating')" style="cursor: pointer;">Rating</th>
+                            <th onclick="sortBooksTable('tag')" style="cursor: pointer;">Tag</th>
+                            <th>Platform</th>
+                            <th>Ownership</th>
+                            <th onclick="sortBooksTable('pages')" style="cursor: pointer;">Pages</th>
+                            <th onclick="sortBooksTable('word_count')" style="cursor: pointer;">Words</th>
+                            <th onclick="sortBooksTable('date_read')" style="cursor: pointer;">Date Read</th>
+                            <th style="width:50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="booksPagination"></div>
+        </div>
+
+        <!-- TAB 3: STATISTICS -->
+        <div id="stats" class="tab-content">
+            <!-- Hero: Year Tracker (full width, prominent) -->
+            <div class="stats-hero" id="yearTrackerHero">
+                <h2 id="yearTrackerTitle">2026 Reading Pace</h2>
+                <div id="yearTracker"></div>
+            </div>
+
+            <!-- Compact totals row -->
+            <div class="stats-totals" id="overviewStats"></div>
+
+            <!-- Two-column: Monthly pace + Tags this year -->
+            <div class="stats-two-col">
+                <div class="stats-panel">
+                    <h3 id="monthlyChartTitle">Monthly Pace (2026)</h3>
+                    <div id="monthlyChart"></div>
+                </div>
+                <div class="stats-panel">
+                    <h3 id="tagYearTitle">Tags — 2026</h3>
+                    <div id="tagChartYear"></div>
+                </div>
+            </div>
+
+            <!-- Reading Speed -->
+            <div class="stats-panel">
+                <h3>Reading Speed</h3>
+                <div id="readingSpeed"></div>
+            </div>
+
+            <!-- Reading Journey (full width) -->
+            <div class="stats-panel">
+                <h3>Reading Journey</h3>
+                <div id="readingJourney"></div>
+            </div>
+
+            <!-- Recently Read (full width) -->
+            <div class="stats-panel">
+                <h3>Recently Read</h3>
+                <table class="recently-read-table" id="recentlyReadTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Rating</th>
+                            <th>Date Read</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentlyReadBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============ DATA MANAGEMENT ============
+        const BOOKS_PER_PAGE = 50;
+        const PLATFORMS = ['Kindle', 'Physical', 'Mofibo', 'Apple Books', 'Saxo'];
+        const FORMATS = ['ebook', 'Kindle Edition', 'Hardcover', 'Paperback'];
+        const OWNERSHIP_TYPES = ['Owned', 'Streamed', 'Borrowed', 'Free'];
+        const TAGS = ['Dramione', 'Fantasy', 'Krimi', 'Romance', 'Sci-Fi', 'Non-Fiction', 'Fanfiction', 'Klassiker', 'Literary Fiction'];
+
+        let books = [];
+
+        // ============ SUPABASE CONFIG ============
+        const SUPABASE_URL = 'https://fhlotfddxcpczokbvzdq.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_j5HwrulwEUxT9WVKjTsRsg_bYyaRa9r';
+
+        const supabase = {
+            async fetchBooks() {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/books?select=*&order=id', {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY
+                    }
+                });
+                if (!resp.ok) throw new Error('Failed to load books from Supabase');
+                return resp.json();
+            },
+
+            async updateBook(id, fields) {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/books?id=eq.' + id, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fields)
+                });
+                if (!resp.ok) throw new Error('Failed to update book on Supabase');
+                return resp;
+            },
+
+            async insertBook(book) {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/books', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(book)
+                });
+                if (!resp.ok) throw new Error('Failed to insert book on Supabase');
+                const rows = await resp.json();
+                return rows[0];
+            },
+
+            async insertBooks(booksArr) {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/books', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(booksArr)
+                });
+                if (!resp.ok) throw new Error('Failed to insert books on Supabase');
+                return resp.json();
+            },
+
+            async deleteBook(id) {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/books?id=eq.' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY
+                    }
+                });
+                if (!resp.ok) throw new Error('Failed to delete book from Supabase');
+                return resp;
+            }
+        };
+
+        let currentTab = 'overview';
+        let currentPage = { overview: 1, books: 1 };
+        let booksSort = { field: 'date_read', direction: 'desc' };
+        let filteredBooks = [...books];
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            const loadingDiv = document.getElementById('overview');
+            if (loadingDiv) {
+                loadingDiv.innerHTML = '<div class="loading">Loading books from Supabase...</div>';
+            }
+
+            try {
+                const fetchedBooks = await supabase.fetchBooks();
+                books = fetchedBooks;
+                filteredBooks = [...books];
+                // Restore overview HTML that was replaced by loading message
+                loadingDiv.innerHTML = `
+                    <div class="currently-reading-section" id="currentlyReadingSection"></div>
+                    <div class="tbr-picker-section" id="tbrPickerSection"></div>
+                `;
+                renderOverviewTab();
+                attachEventListeners();
+            } catch (err) {
+                console.error(err);
+                if (loadingDiv) {
+                    loadingDiv.innerHTML = '<div class="loading" style="color: #dc2626;">Error loading books: ' + err.message + '</div>';
+                }
+            }
+        });
+
+        // ============ SUPABASE HELPER ============
+        async function updateToSupabase(bookId, fields) {
+            try {
+                await supabase.updateBook(bookId, fields);
+            } catch (err) {
+                console.error('Supabase update failed:', err);
+                showToast('Failed to save changes');
+            }
+        }
+
+        // ============ HELPER FUNCTIONS ============
+        function getPlatforms(book) {
+            return book.platform ? book.platform.split(',').map(p => p.trim()).filter(p => p) : [];
+        }
+
+        function hasPlatform(book, platform) {
+            return getPlatforms(book).includes(platform);
+        }
+
+        function getPlatformBadgeClass(platform) {
+            const map = {
+                'Kindle': 'badge-kindle',
+                'Physical': 'badge-physical',
+                'Mofibo': 'badge-mofibo',
+                'Apple Books': 'badge-apple',
+                'Saxo': 'badge-saxo'
+            };
+            return map[platform] || 'badge-saxo';
+        }
+
+        function getOwnershipBadgeClass(ownership) {
+            const map = {
+                'Owned': 'badge-owned',
+                'Streamed': 'badge-streamed',
+                'Borrowed': 'badge-borrowed',
+                'Free': 'badge-free'
+            };
+            return map[ownership] || 'badge-free';
+        }
+
+        function renderStars(rating, clickable = false, bookId = null) {
+            const filled = rating || 0;
+            let html = '<div class="star-rating"' + (clickable ? ' onclick="event.stopPropagation()"' : '') + '>';
+            for (let i = 1; i <= 5; i++) {
+                const starClass = i <= filled ? 'filled' : 'empty';
+                if (clickable) {
+                    html += '<span class="star ' + starClass + '" onclick="updateRating(' + bookId + ', ' + i + ')" data-rating="' + i + '">★</span>';
+                } else {
+                    html += '<span class="star ' + starClass + '">★</span>';
+                }
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // ============ TAB SWITCHING ============
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+
+            if (tab === 'overview') renderOverviewTab();
+            else if (tab === 'books') renderBooksTab();
+            else if (tab === 'stats') renderStatsTab();
+        }
+
+        // ============ TAB 1: OVERVIEW ============
+        function renderOverviewTab() {
+            // Currently Reading section
+            const crBooks = books.filter(b => b.status === 'currently-reading');
+            let crHtml = '<h3>Currently Reading</h3>';
+            if (crBooks.length > 0) {
+                crHtml += '<div class="currently-reading-cards">';
+                crBooks.forEach(b => {
+                    const details = [];
+                    if (b.pages) details.push(b.pages + ' pages');
+                    if (b.word_count) details.push(b.word_count.toLocaleString() + ' words');
+                    if (b.format) details.push(b.format);
+                    let durationHtml = '';
+                    if (b.date_started) {
+                        const started = new Date(b.date_started.replace(/\//g, '-'));
+                        const now = new Date();
+                        const days = Math.ceil((now - started) / (1000 * 60 * 60 * 24));
+                        durationHtml = '<div class="cr-card-duration">Day ' + days + ' · started ' + b.date_started + '</div>';
+                    }
+                    crHtml += `
+                        <div class="cr-card">
+                            <div class="cr-card-title">${b.title}</div>
+                            <div class="cr-card-author">${b.author || 'Unknown author'}</div>
+                            <div class="cr-card-meta">${details.join(' · ')}</div>
+                            ${durationHtml}
+                            <div class="cr-card-actions">
+                                <button class="btn-finished" onclick="markFinished(${b.id}, this)">&#10003; Finished</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                crHtml += '</div>';
+            } else {
+                crHtml += '<div class="cr-empty">No books currently being read — pick one from your TBR!</div>';
+            }
+            document.getElementById('currentlyReadingSection').innerHTML = crHtml;
+
+            // TBR Picker section
+            renderTbrPicker();
+        }
+
+        let tbrPickedBook = null;
+        function renderTbrPicker() {
+            const tbrBooks = books.filter(b => b.status === 'to-read');
+            let html = '<h3>What should I read next?</h3>';
+            if (tbrBooks.length === 0) {
+                html += '<div class="cr-empty">Your TBR list is empty!</div>';
+            } else {
+                html += '<div class="tbr-picker-controls">';
+                html += '<button class="btn-pick-random" onclick="pickRandomTbr()">Pick a random book</button>';
+                html += '<span class="tbr-count">' + tbrBooks.length + ' books on TBR</span>';
+                html += '</div>';
+                html += '<div id="tbrPickResult">';
+                if (tbrPickedBook && tbrPickedBook.status === 'to-read') {
+                    html += renderTbrCard(tbrPickedBook);
+                }
+                html += '</div>';
+            }
+            document.getElementById('tbrPickerSection').innerHTML = html;
+        }
+
+        function renderTbrCard(b) {
+            const details = [];
+            if (b.pages) details.push(b.pages + ' pages');
+            if (b.word_count) details.push(b.word_count.toLocaleString() + ' words');
+            if (b.format) details.push(b.format);
+            if (b.platform) details.push(b.platform);
+            return `
+                <div class="tbr-pick-card">
+                    <div class="cr-card-title">${b.title}</div>
+                    <div class="cr-card-author">${b.author || 'Unknown author'}</div>
+                    <div class="cr-card-meta">${details.join(' · ')}</div>
+                    <div class="tbr-pick-actions">
+                        <button class="btn-start-reading" onclick="startReading(${b.id}, this)">Start Reading</button>
+                        <button class="btn-pick-again" onclick="pickRandomTbr()">Pick another</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function pickRandomTbr() {
+            const tbrBooks = books.filter(b => b.status === 'to-read');
+            if (tbrBooks.length === 0) return;
+            const pick = tbrBooks[Math.floor(Math.random() * tbrBooks.length)];
+            tbrPickedBook = pick;
+            const resultDiv = document.getElementById('tbrPickResult');
+            resultDiv.innerHTML = renderTbrCard(pick);
+            resultDiv.querySelector('.tbr-pick-card').classList.add('tbr-pick-animate');
+        }
+
+        async function startReading(bookId, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            const today = new Date();
+            const dateStarted = today.getFullYear() + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + String(today.getDate()).padStart(2, '0');
+            try {
+                await supabase.updateBook(bookId, { status: 'currently-reading', date_started: dateStarted });
+                const book = books.find(b => b.id === bookId);
+                if (book) { book.status = 'currently-reading'; book.date_started = dateStarted; }
+                tbrPickedBook = null;
+                showToast('"' + (book ? book.title : 'Book') + '" — started reading!');
+                if (currentTab === 'overview') renderOverviewTab();
+                else if (currentTab === 'books') { applyFilters(); renderBooksTable(); renderBooksPagination(); }
+            } catch (e) {
+                alert('Could not update book: ' + e.message);
+                btn.disabled = false;
+                btn.textContent = 'Start Reading';
+            }
+        }
+
+        function markFinished(bookId, btn) {
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+            showRatingDialog(book);
+        }
+
+        function showRatingDialog(book) {
+            // Remove existing dialog if any
+            const existing = document.getElementById('ratingDialog');
+            if (existing) existing.remove();
+
+            const dialog = document.createElement('div');
+            dialog.id = 'ratingDialog';
+            dialog.className = 'rating-dialog-overlay';
+            dialog.innerHTML = `
+                <div class="rating-dialog">
+                    <h3>Rate "${book.title}"</h3>
+                    <p class="rating-dialog-sub">How would you rate this book?</p>
+                    <div class="rating-dialog-stars" id="dialogStars">
+                        ${[1,2,3,4,5].map(i => `<span class="rating-star" data-val="${i}" onclick="selectDialogRating(${i})">★</span>`).join('')}
+                    </div>
+                    <div class="rating-dialog-selected" id="dialogRatingLabel">No rating</div>
+                    <div class="rating-dialog-actions">
+                        <button class="btn-finished" id="dialogSaveBtn" onclick="confirmFinished(${book.id})">Save &amp; mark as read</button>
+                        <button class="btn-pick-again" onclick="document.getElementById('ratingDialog').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+        }
+
+        let dialogRating = 0;
+        function selectDialogRating(val) {
+            dialogRating = val;
+            document.querySelectorAll('#dialogStars .rating-star').forEach(s => {
+                s.classList.toggle('selected', parseInt(s.dataset.val) <= val);
+            });
+            document.getElementById('dialogRatingLabel').textContent = val + ' / 5';
+        }
+
+        async function confirmFinished(bookId) {
+            const btn = document.getElementById('dialogSaveBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            const today = new Date();
+            const dateRead = today.getFullYear() + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + String(today.getDate()).padStart(2, '0');
+            const updates = { status: 'read', date_read: dateRead };
+            if (dialogRating > 0) updates.my_rating = dialogRating;
+            try {
+                await supabase.updateBook(bookId, updates);
+                const book = books.find(b => b.id === bookId);
+                if (book) Object.assign(book, updates);
+                dialogRating = 0;
+                document.getElementById('ratingDialog').remove();
+                renderOverviewTab();
+                showToast('"' + (book ? book.title : 'Book') + '" marked as read!');
+            } catch (e) {
+                alert('Could not update book: ' + e.message);
+                btn.disabled = false;
+                btn.textContent = 'Save & mark as read';
+            }
+        }
+
+        // ============ TAB 2: ALL BOOKS ============
+        let booksFiltersRendered = false;
+        function renderBooksTab() {
+            if (!booksFiltersRendered) {
+                renderBooksFilters();
+                booksFiltersRendered = true;
+            }
+            applyFilters();
+            renderBooksTable();
+            renderBooksPagination();
+        }
+
+        function applyFilters() {
+            filteredBooks = [...books];
+
+            const searchTerm = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+            if (searchTerm) {
+                const words = searchTerm.split(/\s+/).filter(w => w);
+                filteredBooks = filteredBooks.filter(b => {
+                    const combined = ((b.title || '') + ' ' + (b.author || '')).toLowerCase();
+                    return words.every(w => combined.includes(w));
+                });
+            }
+
+            const platformFilter = document.querySelector('[data-filter-type="platform"][data-filter-value].active')?.getAttribute('data-filter-value');
+            if (platformFilter && platformFilter !== 'All') {
+                filteredBooks = filteredBooks.filter(b => hasPlatform(b, platformFilter));
+            }
+
+            const ratingFilter = document.querySelector('[data-filter-type="rating"].active');
+            if (ratingFilter) {
+                const rating = parseInt(ratingFilter.getAttribute('data-filter-value'));
+                if (rating > 0) {
+                    filteredBooks = filteredBooks.filter(b => b.my_rating === rating);
+                }
+            }
+
+            const quickFilter = document.getElementById('quickFilter')?.value || 'all';
+            if (quickFilter === 'missing-platform') {
+                filteredBooks = filteredBooks.filter(b => !b.platform || b.platform.trim() === '');
+            } else if (quickFilter === 'missing-ownership') {
+                filteredBooks = filteredBooks.filter(b => !b.ownership || b.ownership.trim() === '');
+            } else if (quickFilter === 'unrated') {
+                filteredBooks = filteredBooks.filter(b => b.my_rating === 0);
+            } else if (quickFilter === 'to-read') {
+                filteredBooks = filteredBooks.filter(b => b.status === 'to-read');
+            } else if (quickFilter === 'currently-reading') {
+                filteredBooks = filteredBooks.filter(b => b.status === 'currently-reading');
+            }
+
+            const tagFilter = document.getElementById('tagFilter')?.value || 'all';
+            if (tagFilter === 'none') {
+                filteredBooks = filteredBooks.filter(b => !b.tag);
+            } else if (tagFilter !== 'all') {
+                filteredBooks = filteredBooks.filter(b => b.tag === tagFilter);
+            }
+
+            filteredBooks.sort((a, b) => {
+                let aVal = a[booksSort.field] || '';
+                let bVal = b[booksSort.field] || '';
+                if (booksSort.field === 'date_read') {
+                    aVal = aVal ? new Date(aVal.replace(/\//g, '-')).getTime() : 0;
+                    bVal = bVal ? new Date(bVal.replace(/\//g, '-')).getTime() : 0;
+                }
+                if (typeof aVal === 'string') { aVal = aVal.toLowerCase(); bVal = (bVal + '').toLowerCase(); }
+                if (aVal < bVal) return booksSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return booksSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function renderBooksTable() {
+            try {
+                const start = (currentPage.books - 1) * BOOKS_PER_PAGE;
+                const end = start + BOOKS_PER_PAGE;
+                const pageBooks = filteredBooks.slice(start, end);
+                const searchVal = document.getElementById('searchInput')?.value || '';
+
+                let html = '';
+                if (pageBooks.length === 0) {
+                    html = '<tr><td colspan="9" style="text-align:center; padding:2rem; color:#dc2626; font-weight:600;">DEBUG: 0 results. Search="' + searchVal + '", books.length=' + books.length + ', filteredBooks.length=' + filteredBooks.length + '</td></tr>';
+                }
+                pageBooks.forEach(b => {
+                    const platforms = getPlatforms(b);
+                    let platformHtml = '';
+                    if (platforms.length === 0) {
+                        platformHtml = '<span style="color:#9ca3af">—</span>';
+                    } else {
+                        platforms.forEach(p => {
+                            platformHtml += '<span class="badge ' + getPlatformBadgeClass(p) + '">' + p + '</span>';
+                        });
+                    }
+
+                    const ownershipHtml = b.ownership ? '<span class="badge ' + getOwnershipBadgeClass(b.ownership) + '">' + b.ownership + '</span>' : '<span class="badge badge-free">-</span>';
+
+                    const tagHtml = b.tag ? '<span class="badge badge-tag">' + b.tag + '</span>' : '<span style="color:#9ca3af">—</span>';
+
+                    html += `
+                        <tr>
+                            <td>${b.title}</td>
+                            <td>${b.author}</td>
+                            <td>${renderStars(b.my_rating)}</td>
+                            <td>${tagHtml}</td>
+                            <td>${platformHtml}</td>
+                            <td>${ownershipHtml}</td>
+                            <td>${b.pages ? b.pages : (b.word_count > 0 ? '<span style="color:var(--accent)" title="Calculated from word count">' + Math.ceil(b.word_count / 220).toLocaleString() + '</span>' : '-')}</td>
+                            <td>${b.word_count ? b.word_count.toLocaleString() : '-'}</td>
+                            <td>${b.date_read || '-'}</td>
+                            <td style="white-space:nowrap">
+                                ${b.status === 'to-read' ? '<button onclick="startReading(' + b.id + ', this)" style="background:var(--accent); color:white; border:none; border-radius:4px; padding:0.25rem 0.5rem; cursor:pointer; font-size:0.8rem; font-weight:600; margin-right:0.25rem;" onmouseover="this.style.background=\'var(--primary)\'" onmouseout="this.style.background=\'var(--accent)\'">Start</button>' : ''}
+                                <button onclick="openEditBookModal(${b.id})" style="background:none; border:1px solid var(--gray-300); border-radius:4px; padding:0.25rem 0.5rem; cursor:pointer; font-size:0.8rem; color:var(--gray-500);" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--gray-300)';this.style.color='var(--gray-500)'">Edit</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('booksTableBody').innerHTML = html;
+            } catch (err) {
+                document.getElementById('booksTableBody').innerHTML = '<tr><td colspan="9" style="color:red; padding:2rem;">Error: ' + err.message + '</td></tr>';
+            }
+        }
+
+        function renderBooksFilters() {
+            let platformHtml = '<button class="filter-button active" data-filter-type="platform" data-filter-value="All" onclick="filterBooks(this)">All</button>';
+            PLATFORMS.forEach(p => {
+                platformHtml += '<button class="filter-button" data-filter-type="platform" data-filter-value="' + p + '" onclick="filterBooks(this)">' + p + '</button>';
+            });
+            document.getElementById('platformFilters').innerHTML = platformHtml;
+
+            let ratingHtml = '<button class="filter-button active" data-filter-type="rating" data-filter-value="0" onclick="filterBooks(this)">All</button>';
+            for (let i = 1; i <= 5; i++) {
+                const stars = '★'.repeat(i);
+                ratingHtml += '<button class="filter-button" data-filter-type="rating" data-filter-value="' + i + '" onclick="filterBooks(this)">' + stars + '</button>';
+            }
+            document.getElementById('ratingFilters').innerHTML = ratingHtml;
+        }
+
+        function filterBooks(button) {
+            const filterType = button.getAttribute('data-filter-type');
+            document.querySelectorAll('[data-filter-type="' + filterType + '"]').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            currentPage.books = 1;
+            applyFilters();
+            renderBooksTable();
+            renderBooksPagination();
+        }
+
+        function sortBooksTable(field) {
+            if (booksSort.field === field) {
+                booksSort.direction = booksSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                booksSort.field = field;
+                booksSort.direction = 'asc';
+            }
+            currentPage.books = 1;
+            applyFilters();
+            renderBooksTable();
+            renderBooksPagination();
+        }
+
+        function renderBooksPagination() {
+            const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
+            let html = '<button onclick="prevPage(' + "'books'" + ')" ' + (currentPage.books === 1 ? 'disabled' : '') + '>← Previous</button>';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const active = i === currentPage.books ? ' active' : '';
+                html += '<button class="' + active + '" onclick="goToPage(' + "'books'" + ', ' + i + ')">' + i + '</button>';
+            }
+            
+            html += '<button onclick="nextPage(' + "'books'" + ')" ' + (currentPage.books === totalPages ? 'disabled' : '') + '>Next →</button>';
+            document.getElementById('booksPagination').innerHTML = html;
+        }
+
+        function prevPage(tab) {
+            if (currentPage[tab] > 1) {
+                currentPage[tab]--;
+                applyFilters(); renderBooksTable(); renderBooksPagination();
+            }
+        }
+
+        function nextPage(tab) {
+            const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
+            if (currentPage[tab] < totalPages) {
+                currentPage[tab]++;
+                applyFilters(); renderBooksTable(); renderBooksPagination();
+            }
+        }
+
+        function goToPage(tab, page) {
+            currentPage[tab] = page;
+            applyFilters(); renderBooksTable(); renderBooksPagination();
+        }
+
+        // ============ TAB 3: STATISTICS ============
+        function renderStatsTab() {
+            const currentYear = new Date().getFullYear();
+            const rated = books.filter(b => b.my_rating > 0);
+            const avgRating = rated.length > 0 ? (rated.reduce((sum, b) => sum + b.my_rating, 0) / rated.length).toFixed(2) : 0;
+            const totalWords = books.reduce((sum, b) => sum + (b.word_count || 0), 0);
+            const currentlyReading = books.filter(b => b.status === 'currently-reading').length;
+            const toBeRead = books.filter(b => b.status === 'to-read').length;
+            const uniqueAuthors = new Set(books.map(b => b.author)).size;
+            const fiveStarBooks = books.filter(b => b.my_rating === 5).length;
+
+            // Books read this year
+            const booksThisYear = books.filter(b => b.date_read && b.date_read.startsWith(String(currentYear)));
+            const booksReadThisYear = booksThisYear.length;
+
+            document.getElementById('overviewStats').innerHTML = `
+                <div class="stat-card"><div class="label">Total Books</div><div class="value">${books.length}</div></div>
+                <div class="stat-card"><div class="label">Read in ${currentYear}</div><div class="value">${booksReadThisYear}</div></div>
+                <div class="stat-card"><div class="label">Currently Reading</div><div class="value">${currentlyReading}</div></div>
+                <div class="stat-card"><div class="label">TBR</div><div class="value">${toBeRead}</div></div>
+                <div class="stat-card"><div class="label">Average Rating</div><div class="value">${avgRating}</div></div>
+                <div class="stat-card"><div class="label">Unique Authors</div><div class="value">${uniqueAuthors}</div></div>
+                <div class="stat-card"><div class="label">5-Star Books</div><div class="value">${fiveStarBooks}</div></div>
+                <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
+            `;
+
+            // Year tracker — pace for current year
+            document.getElementById('yearTrackerTitle').textContent = currentYear + ' Reading Pace';
+            const now = new Date();
+            const startOfYear = new Date(currentYear, 0, 1);
+            const endOfYear = new Date(currentYear, 11, 31);
+            const daysElapsed = Math.ceil((now - startOfYear) / (1000 * 60 * 60 * 24));
+            const totalDays = 365 + (currentYear % 4 === 0 ? 1 : 0);
+            const pacePerMonth = booksReadThisYear > 0 ? (booksReadThisYear / daysElapsed * 30.44).toFixed(1) : 0;
+            const projectedTotal = booksReadThisYear > 0 ? Math.round(booksReadThisYear / daysElapsed * totalDays) : 0;
+
+            const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const monthlyCounts = new Array(12).fill(0);
+            booksThisYear.forEach(b => {
+                const parts = b.date_read.split('/');
+                if (parts.length >= 2) monthlyCounts[parseInt(parts[1]) - 1]++;
+            });
+
+            let trackerHtml = '<div class="pace-numbers">';
+            trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--primary)">' + booksReadThisYear + '</div><div class="pace-label">books read</div></div>';
+            trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--accent)">' + pacePerMonth + '</div><div class="pace-label">per month</div></div>';
+            trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--gray-400)">' + projectedTotal + '</div><div class="pace-label">projected EOY</div></div>';
+            trackerHtml += '</div>';
+
+            // Progress bar
+            const progressPct = Math.min(100, Math.round(daysElapsed / totalDays * 100));
+            trackerHtml += '<div class="pace-progress">';
+            trackerHtml += '<div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--gray-400); margin-bottom:0.35rem;"><span>Jan</span><span>' + progressPct + '% of year</span><span>Dec</span></div>';
+            trackerHtml += '<div class="bar-track" style="height:10px; border-radius:5px;"><div class="bar-fill" style="width:' + progressPct + '%; border-radius:5px;"></div></div>';
+            trackerHtml += '</div>';
+
+            document.getElementById('yearTracker').innerHTML = trackerHtml;
+
+            // Monthly pace chart (current year)
+            document.getElementById('monthlyChartTitle').textContent = 'Monthly Pace (' + currentYear + ')';
+            const maxMonth = Math.max(...monthlyCounts, 1);
+            let monthlyHtml = '';
+            monthlyCounts.forEach((count, i) => {
+                if (i > now.getMonth()) return; // skip future months
+                const percentage = Math.round((count / maxMonth) * 100);
+                monthlyHtml += `<div class="bar-item"><div class="bar-label"><span>${monthNames[i]}</span><span>${count}</span></div><div class="bar-track"><div class="bar-fill" style="width: ${percentage}%">${count}</div></div></div>`;
+            });
+            document.getElementById('monthlyChart').innerHTML = monthlyHtml;
+
+            // Tag breakdown — current year
+            document.getElementById('tagYearTitle').textContent = 'Tags — ' + currentYear;
+            const tagCountsYear = {};
+            booksThisYear.forEach(b => { const t = b.tag || 'Untagged'; tagCountsYear[t] = (tagCountsYear[t] || 0) + 1; });
+            const maxTagYear = Math.max(...Object.values(tagCountsYear), 1);
+            let tagYearHtml = '';
+            if (Object.keys(tagCountsYear).length === 0) {
+                tagYearHtml = '<div style="color:var(--gray-400); font-style:italic;">No books read yet in ' + currentYear + '</div>';
+            } else {
+                Object.entries(tagCountsYear).sort((a, b) => b[1] - a[1]).forEach(([tag, count]) => {
+                    const percentage = Math.round((count / maxTagYear) * 100);
+                    tagYearHtml += `<div class="bar-item"><div class="bar-label"><span>${tag}</span><span>${count}</span></div><div class="bar-track"><div class="bar-fill" style="width: ${percentage}%">${count}</div></div></div>`;
+                });
+            }
+            document.getElementById('tagChartYear').innerHTML = tagYearHtml;
+
+            // Recently read
+            const recentBooks = [...books].filter(b => b.date_read && b.status === 'read').sort((a, b) => new Date(b.date_read.replace(/\//g, '-')) - new Date(a.date_read.replace(/\//g, '-'))).slice(0, 10);
+            let recentHtml = '';
+            recentBooks.forEach(b => {
+                const tagBadge = b.tag ? ' <span class="badge badge-tag">' + b.tag + '</span>' : '';
+                let durationText = '';
+                if (b.date_started && b.date_read) {
+                    const s = new Date(b.date_started.replace(/\//g, '-'));
+                    const e = new Date(b.date_read.replace(/\//g, '-'));
+                    const days = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+                    if (days >= 0) durationText = '<span style="color:var(--gray-400); font-size:0.8rem;"> · ' + days + (days === 1 ? ' day' : ' days') + '</span>';
+                }
+                recentHtml += `<tr><td>${b.title}${tagBadge}</td><td>${b.author}</td><td>${renderStars(b.my_rating)}</td><td>${b.date_read}${durationText}</td></tr>`;
+            });
+            document.getElementById('recentlyReadBody').innerHTML = recentHtml;
+
+            // Reading Journey — compact GitHub-style heatmap
+            const readBooks = books.filter(b => b.date_read && b.status === 'read');
+            const byYear = {};
+            readBooks.forEach(b => {
+                const parts = b.date_read.split('/');
+                if (parts.length < 2) return;
+                const yr = parts[0], mo = parseInt(parts[1]) - 1;
+                if (!byYear[yr]) byYear[yr] = {};
+                if (!byYear[yr][mo]) byYear[yr][mo] = [];
+                byYear[yr][mo].push(b);
+            });
+
+            // Find max books in any single month for intensity scaling
+            let maxInMonth = 1;
+            Object.values(byYear).forEach(months => {
+                Object.values(months).forEach(arr => { if (arr.length > maxInMonth) maxInMonth = arr.length; });
+            });
+
+            function intensityLevel(count) {
+                if (count === 0) return 0;
+                const ratio = count / maxInMonth;
+                if (ratio <= 0.15) return 1;
+                if (ratio <= 0.35) return 2;
+                if (ratio <= 0.55) return 3;
+                if (ratio <= 0.8) return 4;
+                return 5;
+            }
+
+            const shortMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const sortedYears = Object.keys(byYear).sort((a, b) => parseInt(a) - parseInt(b));
+
+            let journeyHtml = '';
+            // Year headers across the top
+            journeyHtml += '<div class="journey-year-headers">';
+            sortedYears.forEach(yr => { journeyHtml += '<div class="journey-year-header">' + yr + '</div>'; });
+            journeyHtml += '</div>';
+
+            // Each row = a month, each column = a year
+            journeyHtml += '<div class="journey-grid">';
+            for (let m = 0; m < 12; m++) {
+                journeyHtml += '<div class="journey-row">';
+                journeyHtml += '<div class="journey-month-label">' + shortMonths[m] + '</div>';
+                journeyHtml += '<div class="journey-cells">';
+                sortedYears.forEach(yr => {
+                    const mBooks = (byYear[yr] && byYear[yr][m]) || [];
+                    const level = intensityLevel(mBooks.length);
+                    let tooltipContent = '<strong>' + monthNames[m] + ' ' + yr + '</strong><br>';
+                    if (mBooks.length === 0) {
+                        tooltipContent += 'No books';
+                    } else {
+                        tooltipContent += mBooks.length + ' book' + (mBooks.length !== 1 ? 's' : '');
+                        const titles = mBooks.slice(0, 5).map(b => (b.title || 'Untitled').replace(/</g, '&lt;'));
+                        tooltipContent += '<br>' + titles.join('<br>');
+                        if (mBooks.length > 5) tooltipContent += '<br>+' + (mBooks.length - 5) + ' more';
+                    }
+                    journeyHtml += '<div class="journey-cell journey-cell-' + level + '">';
+                    journeyHtml += '<div class="journey-tooltip">' + tooltipContent + '</div>';
+                    journeyHtml += '</div>';
+                });
+                journeyHtml += '</div></div>';
+            }
+            journeyHtml += '</div>';
+
+            // Scale legend
+            journeyHtml += '<div class="journey-scale">';
+            journeyHtml += 'Less ';
+            for (let i = 0; i <= 5; i++) {
+                journeyHtml += '<div class="journey-scale-cell journey-cell-' + i + '"></div>';
+            }
+            journeyHtml += ' More';
+            journeyHtml += '</div>';
+
+            document.getElementById('readingJourney').innerHTML = journeyHtml;
+
+            // ============ READING SPEED ============
+            const booksWithDuration = readBooks.filter(b => b.date_started && b.date_read).map(b => {
+                const s = new Date(b.date_started.replace(/\//g, '-'));
+                const e = new Date(b.date_read.replace(/\//g, '-'));
+                const days = Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24)));
+                return { ...b, readingDays: days };
+            }).filter(b => b.readingDays > 0 && b.readingDays < 365);
+
+            let speedHtml = '';
+            if (booksWithDuration.length > 0) {
+                const avgDays = Math.round(booksWithDuration.reduce((s, b) => s + b.readingDays, 0) / booksWithDuration.length);
+                const fastest = booksWithDuration.reduce((a, b) => a.readingDays < b.readingDays ? a : b);
+                const slowest = booksWithDuration.reduce((a, b) => a.readingDays > b.readingDays ? a : b);
+
+                speedHtml += '<div class="speed-big"><span class="speed-value">' + avgDays + '</span><span class="speed-unit">days avg per book</span></div>';
+                speedHtml += '<div class="speed-records">';
+                speedHtml += '<div class="speed-record"><span class="speed-record-icon">⚡</span><div class="speed-record-info"><span class="speed-record-title">' + (fastest.title || '').replace(/</g,'&lt;') + '</span><span class="speed-record-meta">' + fastest.readingDays + ' day' + (fastest.readingDays !== 1 ? 's' : '') + ' · ' + (fastest.author || '') + '</span></div></div>';
+                speedHtml += '<div class="speed-record"><span class="speed-record-icon">🐢</span><div class="speed-record-info"><span class="speed-record-title">' + (slowest.title || '').replace(/</g,'&lt;') + '</span><span class="speed-record-meta">' + slowest.readingDays + ' day' + (slowest.readingDays !== 1 ? 's' : '') + ' · ' + (slowest.author || '') + '</span></div></div>';
+                speedHtml += '</div>';
+            } else {
+                speedHtml = '<div style="color:var(--gray-400); font-size:0.85rem;">Add start dates to your books to see reading speed stats.</div>';
+            }
+            document.getElementById('readingSpeed').innerHTML = speedHtml;
+        }
+
+        // ============ EDIT BOOK MODAL ============
+        function openEditBookModal(bookId) {
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+
+            document.getElementById('editBookId').value = book.id;
+            document.getElementById('editBookTitle').value = book.title || '';
+            document.getElementById('editBookAuthor').value = book.author || '';
+            document.getElementById('editBookPages').value = book.pages || '';
+            document.getElementById('editBookFormat').value = book.format || '';
+            document.getElementById('editBookOwnership').value = book.ownership || '';
+            document.getElementById('editBookRating').value = book.my_rating || 0;
+            document.getElementById('editBookStatus').value = book.status || 'read';
+            document.getElementById('editBookTag').value = book.tag || '';
+            document.getElementById('editBookYear').value = book.year_published || '';
+            document.getElementById('editBookWordCount').value = book.word_count || '';
+
+            // Convert date format from YYYY/MM/DD to YYYY-MM-DD for date input
+            const dateRead = (book.date_read || '').replace(/\//g, '-');
+            document.getElementById('editBookDateRead').value = dateRead;
+            const dateStarted = (book.date_started || '').replace(/\//g, '-');
+            document.getElementById('editBookDateStarted').value = dateStarted;
+
+            // Set platform checkboxes
+            const currentPlatforms = getPlatforms(book);
+            document.querySelectorAll('#editBookPlatforms input[type="checkbox"]').forEach(cb => {
+                cb.checked = currentPlatforms.includes(cb.value);
+            });
+
+            document.getElementById('editBookModal').classList.add('open');
+        }
+
+        async function deleteBook() {
+            const bookId = parseInt(document.getElementById('editBookId').value);
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+            if (!confirm('Delete "' + book.title + '"? This cannot be undone.')) return;
+            try {
+                await supabase.deleteBook(bookId);
+                books = books.filter(b => b.id !== bookId);
+                filteredBooks = filteredBooks.filter(b => b.id !== bookId);
+                closeEditBookModal();
+                showToast('"' + book.title + '" deleted');
+                if (currentTab === 'overview') renderOverviewTab();
+                else if (currentTab === 'books') { applyFilters(); renderBooksTable(); renderBooksPagination(); }
+                else if (currentTab === 'stats') renderStatsTab();
+            } catch (e) {
+                alert('Could not delete: ' + e.message);
+            }
+        }
+
+        function closeEditBookModal() {
+            document.getElementById('editBookModal').classList.remove('open');
+        }
+
+        async function saveEditedBook() {
+            const bookId = parseInt(document.getElementById('editBookId').value);
+            const book = books.find(b => b.id === bookId);
+            if (!book) return;
+
+            const title = document.getElementById('editBookTitle').value.trim();
+            const author = document.getElementById('editBookAuthor').value.trim();
+            if (!title || !author) { alert('Title and Author are required.'); return; }
+
+            const platformChecks = document.querySelectorAll('#editBookPlatforms input:checked');
+            const platforms = Array.from(platformChecks).map(c => c.value).join(', ');
+
+            const updates = {
+                title: title,
+                author: author,
+                my_rating: parseInt(document.getElementById('editBookRating').value) || 0,
+                pages: parseInt(document.getElementById('editBookPages').value) || 0,
+                format: document.getElementById('editBookFormat').value,
+                platform: platforms,
+                ownership: document.getElementById('editBookOwnership').value,
+                date_started: document.getElementById('editBookDateStarted').value.replace(/-/g, '/') || '',
+                date_read: document.getElementById('editBookDateRead').value.replace(/-/g, '/') || '',
+                year_published: parseInt(document.getElementById('editBookYear').value) || 0,
+                status: document.getElementById('editBookStatus').value || 'read',
+                tag: document.getElementById('editBookTag').value || null,
+                word_count: parseInt(document.getElementById('editBookWordCount').value) || 0
+            };
+
+            // Update local data
+            Object.assign(book, updates);
+
+            // Save to Supabase
+            try {
+                await supabase.updateBook(bookId, updates);
+                closeEditBookModal();
+                showToast('"' + title + '" updated!');
+
+                // Refresh current view
+                if (currentTab === 'overview') renderOverviewTab();
+                else if (currentTab === 'books') { applyFilters(); renderBooksTable(); renderBooksPagination(); }
+                else if (currentTab === 'stats') renderStatsTab();
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to save: ' + err.message);
+            }
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'save-indicator';
+            indicator.textContent = 'Saved';
+            document.body.appendChild(indicator);
+            setTimeout(() => indicator.remove(), 1500);
+        }
+
+        function exportBackup() {
+            const dataStr = JSON.stringify(books, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'sofie-books-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = 'Backup exported successfully!';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ============ EVENT LISTENERS ============
+        function attachEventListeners() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', () => {
+                    currentPage.books = 1;
+                    applyFilters();
+                    renderBooksTable();
+                    renderBooksPagination();
+                });
+            }
+
+        }
+
+        // ============ ADD BOOK MODAL ============
+        function openAddBookModal() {
+            document.getElementById('addBookModal').classList.add('open');
+            document.getElementById('addBookTitle').focus();
+        }
+
+        function closeAddBookModal() {
+            document.getElementById('addBookModal').classList.remove('open');
+            document.getElementById('addBookForm').reset();
+        }
+
+        async function saveNewBook() {
+            const title = document.getElementById('addBookTitle').value.trim();
+            const author = document.getElementById('addBookAuthor').value.trim();
+            if (!title || !author) { alert('Title and Author are required.'); return; }
+
+            const platformChecks = document.querySelectorAll('#addBookPlatforms input:checked');
+            const platforms = Array.from(platformChecks).map(c => c.value).join(', ');
+
+            const today = new Date().toISOString().slice(0,10).replace(/-/g, '/');
+
+            const newBook = {
+                title: title,
+                author: author,
+                my_rating: parseInt(document.getElementById('addBookRating').value) || 0,
+                avg_rating: 0,
+                pages: parseInt(document.getElementById('addBookPages').value) || 0,
+                format: document.getElementById('addBookFormat').value,
+                platform: platforms,
+                ownership: document.getElementById('addBookOwnership').value,
+                date_read: document.getElementById('addBookDateRead').value.replace(/-/g, '/') || '',
+                date_added: today,
+                year_published: parseInt(document.getElementById('addBookYear').value) || 0,
+                status: document.getElementById('addBookStatus').value || 'read',
+                tag: document.getElementById('addBookTag').value || null,
+                publisher: '',
+                word_count: parseInt(document.getElementById('addBookWordCount').value) || 0
+            };
+
+            try {
+                const insertedBook = await supabase.insertBook(newBook);
+                books.unshift(insertedBook);
+                closeAddBookModal();
+
+                // Refresh whichever tab is active
+                if (currentTab === 'overview') renderOverviewTab();
+                else if (currentTab === 'books') { booksFiltersRendered = false; renderBooksTab(); }
+                else if (currentTab === 'stats') renderStatsTab();
+
+                showToast('\"' + title + '\" added!');
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to add book: ' + err.message);
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+    </script>
+
+    <!-- ADD BOOK MODAL -->
+    <div class="modal-overlay" id="addBookModal" onclick="if(event.target===this)closeAddBookModal()">
+        <div class="modal">
+            <h2>Add New Book</h2>
+            <form id="addBookForm" class="modal-form" onsubmit="event.preventDefault();saveNewBook()">
+                <div class="form-row">
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Title *</label>
+                        <input type="text" id="addBookTitle" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Author *</label>
+                        <input type="text" id="addBookAuthor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pages</label>
+                        <input type="number" id="addBookPages" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Format</label>
+                        <select id="addBookFormat">
+                            <option value="">—</option>
+                            <option value="ebook">ebook</option>
+                            <option value="Kindle Edition">Kindle Edition</option>
+                            <option value="Hardcover">Hardcover</option>
+                            <option value="Paperback">Paperback</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ownership</label>
+                        <select id="addBookOwnership">
+                            <option value="">—</option>
+                            <option value="Owned">Owned</option>
+                            <option value="Streamed">Streamed</option>
+                            <option value="Borrowed">Borrowed</option>
+                            <option value="Free">Free</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Platform</label>
+                    <div class="platform-checks" id="addBookPlatforms">
+                        <label><input type="checkbox" value="Kindle"> Kindle</label>
+                        <label><input type="checkbox" value="Physical"> Physical</label>
+                        <label><input type="checkbox" value="Mofibo"> Mofibo</label>
+                        <label><input type="checkbox" value="Apple Books"> Apple Books</label>
+                        <label><input type="checkbox" value="Saxo"> Saxo</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>My Rating</label>
+                        <select id="addBookRating">
+                            <option value="0">Not rated</option>
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★</option>
+                            <option value="3">★★★</option>
+                            <option value="2">★★</option>
+                            <option value="1">★</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="addBookStatus">
+                            <option value="read">Read</option>
+                            <option value="currently-reading">Currently reading</option>
+                            <option value="to-read">To be read (TBR)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tag</label>
+                        <select id="addBookTag">
+                            <option value="">No tag</option>
+                            <option value="Dramione">Dramione</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Krimi">Krimi</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Fanfiction">Fanfiction</option>
+                            <option value="Klassiker">Klassiker</option>
+                            <option value="Literary Fiction">Literary Fiction</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date Read</label>
+                        <input type="date" id="addBookDateRead">
+                    </div>
+                    <div class="form-group">
+                        <label>Year Published</label>
+                        <input type="number" id="addBookYear" min="1000" max="2099">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Word Count</label>
+                        <input type="number" id="addBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('addBookPages').value) document.getElementById('addBookPages').value = Math.ceil(this.value / 220)">
+                    </div>
+                    <div class="form-group">
+                        <label style="color:var(--gray-400); font-size:0.85rem;">Pages auto-fills from word count if empty</label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAddBookModal()">Cancel</button>
+                    <button type="submit" class="btn-save">Add Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="editBookModal" onclick="if(event.target===this)closeEditBookModal()">
+        <div class="modal">
+            <h2>Edit Book</h2>
+            <form id="editBookForm" class="modal-form" onsubmit="event.preventDefault();saveEditedBook()">
+                <input type="hidden" id="editBookId">
+                <div class="form-row">
+                    <div class="form-group" style="grid-column:1/-1">
+                        <label>Title *</label>
+                        <input type="text" id="editBookTitle" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Author *</label>
+                        <input type="text" id="editBookAuthor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pages</label>
+                        <input type="number" id="editBookPages" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Format</label>
+                        <select id="editBookFormat">
+                            <option value="">—</option>
+                            <option value="ebook">ebook</option>
+                            <option value="Kindle Edition">Kindle Edition</option>
+                            <option value="Hardcover">Hardcover</option>
+                            <option value="Paperback">Paperback</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ownership</label>
+                        <select id="editBookOwnership">
+                            <option value="">—</option>
+                            <option value="Owned">Owned</option>
+                            <option value="Streamed">Streamed</option>
+                            <option value="Borrowed">Borrowed</option>
+                            <option value="Free">Free</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Platform</label>
+                    <div class="platform-checks" id="editBookPlatforms">
+                        <label><input type="checkbox" value="Kindle"> Kindle</label>
+                        <label><input type="checkbox" value="Physical"> Physical</label>
+                        <label><input type="checkbox" value="Mofibo"> Mofibo</label>
+                        <label><input type="checkbox" value="Apple Books"> Apple Books</label>
+                        <label><input type="checkbox" value="Saxo"> Saxo</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>My Rating</label>
+                        <select id="editBookRating">
+                            <option value="0">Not rated</option>
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★</option>
+                            <option value="3">★★★</option>
+                            <option value="2">★★</option>
+                            <option value="1">★</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="editBookStatus">
+                            <option value="read">Read</option>
+                            <option value="currently-reading">Currently reading</option>
+                            <option value="to-read">To be read (TBR)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tag</label>
+                        <select id="editBookTag">
+                            <option value="">No tag</option>
+                            <option value="Dramione">Dramione</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Krimi">Krimi</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Fanfiction">Fanfiction</option>
+                            <option value="Klassiker">Klassiker</option>
+                            <option value="Literary Fiction">Literary Fiction</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date Started</label>
+                        <input type="date" id="editBookDateStarted">
+                    </div>
+                    <div class="form-group">
+                        <label>Date Read</label>
+                        <input type="date" id="editBookDateRead">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Year Published</label>
+                        <input type="number" id="editBookYear" min="1000" max="2099">
+                    </div>
+                    <div class="form-group"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Word Count</label>
+                        <input type="number" id="editBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('editBookPages').value) document.getElementById('editBookPages').value = Math.ceil(this.value / 220)">
+                    </div>
+                    <div class="form-group">
+                        <label style="color:var(--gray-400); font-size:0.85rem;">Pages auto-fills from word count if empty</label>
+                    </div>
+                </div>
+                <div class="modal-actions" style="display:flex; justify-content:space-between;">
+                    <button type="button" class="btn-delete" onclick="deleteBook()">Delete Book</button>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button type="button" class="btn-cancel" onclick="closeEditBookModal()">Cancel</button>
+                        <button type="submit" class="btn-save">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
