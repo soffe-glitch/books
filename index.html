@@ -2503,71 +2503,61 @@
 
         function addScannedBook() {
             if (!scannedBookData) return;
-            closeScanModal();
-            openAddBookModal();
+            
+            // Stop scanner and close scan modal first
+            stopScanner();
+            document.getElementById('scanModal').classList.remove('open');
 
+            // Wait for iOS camera to fully release, then open form
             setTimeout(() => {
-                // Pre-fill all fields from scan data
-                const fields = {
-                    addBookTitle: scannedBookData.title || '',
-                    addBookAuthor: scannedBookData.author || '',
-                    addBookPages: scannedBookData.pages || '',
-                    addBookYear: scannedBookData.year || '',
-                };
+                openAddBookModal();
 
-                // Set text/number fields
-                for (const [id, val] of Object.entries(fields)) {
-                    const el = document.getElementById(id);
-                    if (el) el.value = val;
-                }
-
-                // Set dropdowns
-                document.getElementById('addBookFormat').value = scannedBookData.format || '';
-                document.getElementById('addBookOwnership').value = 'Owned';
-                document.getElementById('addBookStatus').value = 'read';
-
-                // Set tag if found
-                if (scannedBookData.tag) {
-                    document.getElementById('addBookTag').value = scannedBookData.tag;
-                }
-
-                // Set Physical checkbox
-                const physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
-                if (physicalCheck) physicalCheck.checked = true;
-
-                // Highlight missing required fields with red
-                const requiredFields = [
-                    { id: 'addBookTitle', val: scannedBookData.title },
-                    { id: 'addBookAuthor', val: scannedBookData.author },
-                    { id: 'addBookPages', val: scannedBookData.pages },
-                    { id: 'addBookYear', val: scannedBookData.year },
-                    { id: 'addBookTag', val: scannedBookData.tag },
-                ];
-
-                for (const field of requiredFields) {
-                    const el = document.getElementById(field.id);
-                    const label = el?.closest('.form-group')?.querySelector('label');
-                    if (!field.val) {
-                        el?.classList.add('scan-missing');
-                        label?.classList.add('scan-missing-label');
-                    } else {
-                        el?.classList.remove('scan-missing');
-                        label?.classList.remove('scan-missing-label');
+                // Fill fields after modal has opened
+                setTimeout(() => {
+                    // Pre-fill all fields from scan data
+                    document.getElementById('addBookTitle').value = scannedBookData.title || '';
+                    document.getElementById('addBookAuthor').value = scannedBookData.author || '';
+                    document.getElementById('addBookPages').value = scannedBookData.pages || '';
+                    document.getElementById('addBookYear').value = scannedBookData.year || '';
+                    document.getElementById('addBookFormat').value = scannedBookData.format || '';
+                    document.getElementById('addBookOwnership').value = 'Owned';
+                    document.getElementById('addBookStatus').value = 'read';
+                    if (scannedBookData.tag) {
+                        document.getElementById('addBookTag').value = scannedBookData.tag;
                     }
-                }
+                    const physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
+                    if (physicalCheck) physicalCheck.checked = true;
 
-                // Clear highlights when user edits a field
-                document.querySelectorAll('.scan-missing').forEach(el => {
-                    el.addEventListener('input', () => {
-                        el.classList.remove('scan-missing');
-                        el.closest('.form-group')?.querySelector('label')?.classList.remove('scan-missing-label');
-                    }, { once: true });
-                    el.addEventListener('change', () => {
-                        el.classList.remove('scan-missing');
-                        el.closest('.form-group')?.querySelector('label')?.classList.remove('scan-missing-label');
-                    }, { once: true });
-                });
-            }, 150);
+                    // Red highlights on missing required fields
+                    const checks = [
+                        { id: 'addBookTitle', val: scannedBookData.title },
+                        { id: 'addBookAuthor', val: scannedBookData.author },
+                        { id: 'addBookPages', val: scannedBookData.pages },
+                        { id: 'addBookYear', val: scannedBookData.year },
+                        { id: 'addBookTag', val: scannedBookData.tag },
+                    ];
+                    for (const f of checks) {
+                        const el = document.getElementById(f.id);
+                        const lbl = el?.closest('.form-group')?.querySelector('label');
+                        if (!f.val) {
+                            el?.classList.add('scan-missing');
+                            lbl?.classList.add('scan-missing-label');
+                        } else {
+                            el?.classList.remove('scan-missing');
+                            lbl?.classList.remove('scan-missing-label');
+                        }
+                    }
+                    // Clear red on edit
+                    document.querySelectorAll('.scan-missing').forEach(el => {
+                        const handler = () => {
+                            el.classList.remove('scan-missing');
+                            el.closest('.form-group')?.querySelector('label')?.classList.remove('scan-missing-label');
+                        };
+                        el.addEventListener('input', handler, { once: true });
+                        el.addEventListener('change', handler, { once: true });
+                    });
+                }, 200);
+            }, 400);
         }
     </script>
 
