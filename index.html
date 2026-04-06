@@ -1261,6 +1261,7 @@
         }
     </style>
 
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -1268,6 +1269,7 @@
         <p>Track your reading journey across all platforms</p>
         <div class="header-actions">
             <button class="header-btn" onclick="openAddBookModal()">+ Add Book</button>
+            <button class="header-btn" onclick="openScanModal()" style="background:var(--accent);">📷 Scan ISBN</button>
 
         </div>
     </div>
@@ -2357,6 +2359,147 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
+
+
+        // ============ ISBN SCANNER ============
+        let html5QrCode = null;
+        let scannedBookData = null;
+
+        function openScanModal() {
+            document.getElementById('scanModal').classList.add('open');
+            document.getElementById('scanResult').style.display = 'none';
+            document.getElementById('scanAddBtn').style.display = 'none';
+            document.getElementById('scanStatus').textContent = 'Starting camera...';
+            scannedBookData = null;
+            startScanner();
+        }
+
+        function closeScanModal() {
+            document.getElementById('scanModal').classList.remove('open');
+            stopScanner();
+        }
+
+        async function startScanner() {
+            try {
+                if (html5QrCode) { await html5QrCode.clear(); }
+                html5QrCode = new Html5Qrcode('scanReader');
+                await html5QrCode.start(
+                    { facingMode: 'environment' },
+                    {
+                        fps: 10,
+                        qrbox: { width: 280, height: 120 },
+                        aspectRatio: 1.5,
+                        formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8 ]
+                    },
+                    onScanSuccess,
+                    () => {}
+                );
+                document.getElementById('scanStatus').textContent = 'Point your camera at an ISBN barcode';
+            } catch (err) {
+                document.getElementById('scanStatus').textContent = 'Camera error: ' + err;
+            }
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().catch(() => {});
+            }
+        }
+
+        async function onScanSuccess(isbn) {
+            stopScanner();
+            document.getElementById('scanStatus').textContent = 'Found ISBN: ' + isbn + ' — looking up book...';
+            
+            try {
+                // Try Open Library first
+                const resp = await fetch('https://openlibrary.org/isbn/' + isbn + '.json');
+                if (!resp.ok) throw new Error('Not found on Open Library');
+                const book = await resp.json();
+                
+                // Get author name (separate API call)
+                let authorName = 'Unknown';
+                if (book.authors && book.authors.length > 0) {
+                    const authorKey = book.authors[0].key || book.authors[0];
+                    try {
+                        const authorResp = await fetch('https://openlibrary.org' + authorKey + '.json');
+                        const authorData = await authorResp.json();
+                        authorName = authorData.name || 'Unknown';
+                    } catch(e) {}
+                }
+                
+                // Extract year from publish_date
+                let year = 0;
+                if (book.publish_date) {
+                    const match = book.publish_date.match(/\d{4}/);
+                    if (match) year = parseInt(match[0]);
+                }
+                
+                scannedBookData = {
+                    title: book.title || '',
+                    author: authorName,
+                    pages: book.number_of_pages || 0,
+                    year: year,
+                    format: book.physical_format ? (book.physical_format.toLowerCase().includes('hard') ? 'Hardcover' : 'Paperback') : 'Paperback'
+                };
+                
+                document.getElementById('scanBookTitle').textContent = scannedBookData.title;
+                document.getElementById('scanBookInfo').textContent = authorName + (scannedBookData.pages ? ' \u00B7 ' + scannedBookData.pages + ' pages' : '') + (year ? ' \u00B7 ' + year : '');
+                document.getElementById('scanResult').style.display = 'block';
+                document.getElementById('scanAddBtn').style.display = 'inline-flex';
+                document.getElementById('scanStatus').textContent = 'ISBN: ' + isbn;
+            } catch (err) {
+                // Fallback: try Google Books API
+                try {
+                    const gResp = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn);
+                    const gData = await gResp.json();
+                    if (gData.items && gData.items.length > 0) {
+                        const vol = gData.items[0].volumeInfo;
+                        scannedBookData = {
+                            title: vol.title || '',
+                            author: (vol.authors || ['Unknown']).join(', '),
+                            pages: vol.pageCount || 0,
+                            year: vol.publishedDate ? parseInt(vol.publishedDate.substring(0,4)) : 0,
+                            format: 'Paperback'
+                        };
+                        document.getElementById('scanBookTitle').textContent = scannedBookData.title;
+                        document.getElementById('scanBookInfo').textContent = scannedBookData.author + (scannedBookData.pages ? ' \u00B7 ' + scannedBookData.pages + ' pages' : '') + (scannedBookData.year ? ' \u00B7 ' + scannedBookData.year : '');
+                        document.getElementById('scanResult').style.display = 'block';
+                        document.getElementById('scanAddBtn').style.display = 'inline-flex';
+                        document.getElementById('scanStatus').textContent = 'ISBN: ' + isbn + ' (via Google Books)';
+                    } else {
+                        document.getElementById('scanStatus').textContent = 'ISBN ' + isbn + ' not found. Try again.';
+                        startScanner();
+                    }
+                } catch (e2) {
+                    document.getElementById('scanStatus').textContent = 'Lookup failed. Try again.';
+                    startScanner();
+                }
+            }
+        }
+
+        function addScannedBook() {
+            if (!scannedBookData) return;
+            closeScanModal();
+            
+            // Open the Add Book modal and fill in the fields
+            openAddBookModal();
+            
+            setTimeout(() => {
+                document.getElementById('addBookTitle').value = scannedBookData.title;
+                document.getElementById('addBookAuthor').value = scannedBookData.author;
+                if (scannedBookData.pages) document.getElementById('addBookPages').value = scannedBookData.pages;
+                if (scannedBookData.year) document.getElementById('addBookYear').value = scannedBookData.year;
+                document.getElementById('addBookFormat').value = scannedBookData.format;
+                
+                // Always set Physical + Owned for scanned books
+                document.getElementById('addBookOwnership').value = 'Owned';
+                const physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
+                if (physicalCheck) physicalCheck.checked = true;
+                
+                // Default status to "read"
+                document.getElementById('addBookStatus').value = 'read';
+            }, 100);
+        }
     </script>
 
     <!-- ADD BOOK MODAL -->
@@ -2472,6 +2615,23 @@
                     <button type="submit" class="btn-save">Add Book</button>
                 </div>
             </form>
+        </div>
+    </div>
+    
+    <!-- ISBN SCANNER MODAL -->
+    <div class="modal-overlay" id="scanModal" onclick="if(event.target===this)closeScanModal()">
+        <div class="modal" style="max-width:400px;">
+            <h2>📷 Scan ISBN Barcode</h2>
+            <div id="scanReader" style="width:100%;"></div>
+            <div id="scanStatus" style="text-align:center;padding:0.5rem;color:var(--gray-500);font-size:0.85rem;">Point your camera at an ISBN barcode</div>
+            <div id="scanResult" style="display:none;padding:0.75rem;background:var(--accent-light);border-radius:8px;margin-top:0.5rem;">
+                <div style="font-weight:600;color:var(--primary);margin-bottom:0.25rem;" id="scanBookTitle">Loading...</div>
+                <div style="font-size:0.85rem;color:var(--gray-500);" id="scanBookInfo"></div>
+            </div>
+            <div class="modal-actions" style="margin-top:0.75rem;">
+                <button type="button" class="btn-cancel" onclick="closeScanModal()">Cancel</button>
+                <button type="button" class="btn-save" id="scanAddBtn" style="display:none;" onclick="addScannedBook()">Add This Book</button>
+            </div>
         </div>
     </div>
     <div class="modal-overlay" id="editBookModal" onclick="if(event.target===this)closeEditBookModal()">
