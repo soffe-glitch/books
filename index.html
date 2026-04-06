@@ -2452,7 +2452,8 @@
                     author: data.author || 'Unknown',
                     pages: data.pages || 0,
                     year: data.year || 0,
-                    format: data.format || 'Paperback'
+                    format: data.format || 'Paperback',
+                    tag: data.tag || ''
                 };
                 showScannedResult(isbn, ' (' + data.source + ')');
             } catch (err) {
@@ -2465,7 +2466,8 @@
             document.getElementById('scanBookTitle').textContent = scannedBookData.title;
             document.getElementById('scanBookInfo').textContent = scannedBookData.author
                 + (scannedBookData.pages ? ' \u00B7 ' + scannedBookData.pages + ' pages' : '')
-                + (scannedBookData.year ? ' \u00B7 ' + scannedBookData.year : '');
+                + (scannedBookData.year ? ' \u00B7 ' + scannedBookData.year : '')
+                + (scannedBookData.tag ? ' \u00B7 ' + scannedBookData.tag : '');
             document.getElementById('scanResult').style.display = 'block';
             document.getElementById('scanAddBtn').style.display = 'inline-flex';
             document.getElementById('scanError').style.display = 'none';
@@ -2510,7 +2512,7 @@
                 date_added: today,
                 year_published: scannedBookData.year || 0,
                 status: status,
-                tag: null,
+                tag: scannedBookData.tag || null,
                 publisher: '',
                 word_count: 0
             };
