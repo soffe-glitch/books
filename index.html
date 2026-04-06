@@ -2419,9 +2419,11 @@
         }
 
         function stopScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().catch(() => {});
-            }
+            try {
+                if (html5QrCode) {
+                    html5QrCode.stop().catch(() => {});
+                }
+            } catch(e) { /* scanner already stopped */ }
         }
 
         async function onScanSuccess(isbn) {
@@ -2503,61 +2505,60 @@
 
         function addScannedBook() {
             if (!scannedBookData) return;
-            
-            // Stop scanner and close scan modal first
-            stopScanner();
+            try { stopScanner(); } catch(e) {}
+
+            // Save data locally
+            var bookData = Object.assign({}, scannedBookData);
+
+            // Close scan modal
             document.getElementById('scanModal').classList.remove('open');
 
-            // Wait for iOS camera to fully release, then open form
-            setTimeout(() => {
-                openAddBookModal();
+            // Open add book modal directly (no setTimeout)
+            document.getElementById('addBookModal').classList.add('open');
 
-                // Fill fields after modal has opened
-                setTimeout(() => {
-                    // Pre-fill all fields from scan data
-                    document.getElementById('addBookTitle').value = scannedBookData.title || '';
-                    document.getElementById('addBookAuthor').value = scannedBookData.author || '';
-                    document.getElementById('addBookPages').value = scannedBookData.pages || '';
-                    document.getElementById('addBookYear').value = scannedBookData.year || '';
-                    document.getElementById('addBookFormat').value = scannedBookData.format || '';
-                    document.getElementById('addBookOwnership').value = 'Owned';
-                    document.getElementById('addBookStatus').value = 'read';
-                    if (scannedBookData.tag) {
-                        document.getElementById('addBookTag').value = scannedBookData.tag;
-                    }
-                    const physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
-                    if (physicalCheck) physicalCheck.checked = true;
+            // Fill fields synchronously
+            document.getElementById('addBookTitle').value = bookData.title || '';
+            document.getElementById('addBookAuthor').value = bookData.author || '';
+            document.getElementById('addBookPages').value = bookData.pages || '';
+            document.getElementById('addBookYear').value = bookData.year || '';
+            document.getElementById('addBookFormat').value = bookData.format || '';
+            document.getElementById('addBookOwnership').value = 'Owned';
+            document.getElementById('addBookStatus').value = 'read';
+            if (bookData.tag) {
+                document.getElementById('addBookTag').value = bookData.tag;
+            }
+            var physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
+            if (physicalCheck) physicalCheck.checked = true;
 
-                    // Red highlights on missing required fields
-                    const checks = [
-                        { id: 'addBookTitle', val: scannedBookData.title },
-                        { id: 'addBookAuthor', val: scannedBookData.author },
-                        { id: 'addBookPages', val: scannedBookData.pages },
-                        { id: 'addBookYear', val: scannedBookData.year },
-                        { id: 'addBookTag', val: scannedBookData.tag },
-                    ];
-                    for (const f of checks) {
-                        const el = document.getElementById(f.id);
-                        const lbl = el?.closest('.form-group')?.querySelector('label');
-                        if (!f.val) {
-                            el?.classList.add('scan-missing');
-                            lbl?.classList.add('scan-missing-label');
-                        } else {
-                            el?.classList.remove('scan-missing');
-                            lbl?.classList.remove('scan-missing-label');
-                        }
-                    }
-                    // Clear red on edit
-                    document.querySelectorAll('.scan-missing').forEach(el => {
-                        const handler = () => {
-                            el.classList.remove('scan-missing');
-                            el.closest('.form-group')?.querySelector('label')?.classList.remove('scan-missing-label');
-                        };
-                        el.addEventListener('input', handler, { once: true });
-                        el.addEventListener('change', handler, { once: true });
-                    });
-                }, 200);
-            }, 400);
+            // Red highlights on missing required fields
+            var checks = [
+                { id: 'addBookTitle', val: bookData.title },
+                { id: 'addBookAuthor', val: bookData.author },
+                { id: 'addBookPages', val: bookData.pages },
+                { id: 'addBookYear', val: bookData.year },
+                { id: 'addBookTag', val: bookData.tag }
+            ];
+            for (var i = 0; i < checks.length; i++) {
+                var el = document.getElementById(checks[i].id);
+                var lbl = el ? (el.closest('.form-group') ? el.closest('.form-group').querySelector('label') : null) : null;
+                if (!checks[i].val) {
+                    if (el) el.classList.add('scan-missing');
+                    if (lbl) lbl.classList.add('scan-missing-label');
+                } else {
+                    if (el) el.classList.remove('scan-missing');
+                    if (lbl) lbl.classList.remove('scan-missing-label');
+                }
+            }
+            // Clear red on edit
+            document.querySelectorAll('.scan-missing').forEach(function(el) {
+                var handler = function() {
+                    el.classList.remove('scan-missing');
+                    var grp = el.closest('.form-group');
+                    if (grp) { var l = grp.querySelector('label'); if (l) l.classList.remove('scan-missing-label'); }
+                };
+                el.addEventListener('input', handler, { once: true });
+                el.addEventListener('change', handler, { once: true });
+            });
         }
     </script>
 
