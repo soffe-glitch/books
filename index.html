@@ -1259,6 +1259,15 @@
             .modal-actions { margin-top: 0.15rem !important; gap: 0.5rem !important; }
             .btn-cancel, .btn-save { padding: 0.3rem 1rem !important; font-size: 0.8rem !important; }
         }
+
+        /* Scan validation: highlight missing fields */
+        .scan-missing {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 2px rgba(239,68,68,0.15) !important;
+        }
+        .scan-missing-label {
+            color: #ef4444 !important;
+        }
     </style>
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -2304,6 +2313,8 @@
         function closeAddBookModal() {
             document.getElementById('addBookModal').classList.remove('open');
             document.getElementById('addBookForm').reset();
+            document.querySelectorAll('.scan-missing').forEach(el => el.classList.remove('scan-missing'));
+            document.querySelectorAll('.scan-missing-label').forEach(el => el.classList.remove('scan-missing-label'));
         }
 
         async function saveNewBook() {
@@ -2490,50 +2501,73 @@
             startScanner();
         }
 
-        async function addScannedBook() {
+        function addScannedBook() {
             if (!scannedBookData) return;
-            const btn = document.getElementById('scanAddBtn');
-            btn.textContent = 'Saving...';
-            btn.disabled = true;
+            closeScanModal();
+            openAddBookModal();
 
-            const status = document.getElementById('scanBookStatus').value;
-            const today = new Date().toISOString().slice(0,10).replace(/-/g, '/');
+            setTimeout(() => {
+                // Pre-fill all fields from scan data
+                const fields = {
+                    addBookTitle: scannedBookData.title || '',
+                    addBookAuthor: scannedBookData.author || '',
+                    addBookPages: scannedBookData.pages || '',
+                    addBookYear: scannedBookData.year || '',
+                };
 
-            const newBook = {
-                title: scannedBookData.title,
-                author: scannedBookData.author,
-                my_rating: 0,
-                avg_rating: 0,
-                pages: scannedBookData.pages || 0,
-                format: scannedBookData.format || 'Paperback',
-                platform: 'Physical',
-                ownership: 'Owned',
-                date_read: '',
-                date_added: today,
-                year_published: scannedBookData.year || 0,
-                status: status,
-                tag: scannedBookData.tag || null,
-                publisher: '',
-                word_count: 0
-            };
+                // Set text/number fields
+                for (const [id, val] of Object.entries(fields)) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                }
 
-            try {
-                const insertedBook = await supabase.insertBook(newBook);
-                books.unshift(insertedBook);
-                closeScanModal();
+                // Set dropdowns
+                document.getElementById('addBookFormat').value = scannedBookData.format || '';
+                document.getElementById('addBookOwnership').value = 'Owned';
+                document.getElementById('addBookStatus').value = 'read';
 
-                if (currentTab === 'overview') renderOverviewTab();
-                else if (currentTab === 'books') { booksFiltersRendered = false; renderBooksTab(); }
-                else if (currentTab === 'stats') renderStatsTab();
+                // Set tag if found
+                if (scannedBookData.tag) {
+                    document.getElementById('addBookTag').value = scannedBookData.tag;
+                }
 
-                showToast('\u2705 "' + scannedBookData.title + '" added!');
-            } catch (err) {
-                console.error(err);
-                btn.textContent = 'Add This Book';
-                btn.disabled = false;
-                document.getElementById('scanError').style.display = 'block';
-                document.getElementById('scanError').textContent = 'Save failed: ' + err.message;
-            }
+                // Set Physical checkbox
+                const physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
+                if (physicalCheck) physicalCheck.checked = true;
+
+                // Highlight missing required fields with red
+                const requiredFields = [
+                    { id: 'addBookTitle', val: scannedBookData.title },
+                    { id: 'addBookAuthor', val: scannedBookData.author },
+                    { id: 'addBookPages', val: scannedBookData.pages },
+                    { id: 'addBookYear', val: scannedBookData.year },
+                    { id: 'addBookTag', val: scannedBookData.tag },
+                ];
+
+                for (const field of requiredFields) {
+                    const el = document.getElementById(field.id);
+                    const label = el?.closest('.form-group')?.querySelector('label');
+                    if (!field.val) {
+                        el?.classList.add('scan-missing');
+                        label?.classList.add('scan-missing-label');
+                    } else {
+                        el?.classList.remove('scan-missing');
+                        label?.classList.remove('scan-missing-label');
+                    }
+                }
+
+                // Clear highlights when user edits a field
+                document.querySelectorAll('.scan-missing').forEach(el => {
+                    el.addEventListener('input', () => {
+                        el.classList.remove('scan-missing');
+                        el.closest('.form-group')?.querySelector('label')?.classList.remove('scan-missing-label');
+                    }, { once: true });
+                    el.addEventListener('change', () => {
+                        el.classList.remove('scan-missing');
+                        el.closest('.form-group')?.querySelector('label')?.classList.remove('scan-missing-label');
+                    }, { once: true });
+                });
+            }, 150);
         }
     </script>
 
@@ -2663,14 +2697,7 @@
             <div id="scanResult" style="display:none;padding:0.75rem;background:var(--accent-light);border-radius:8px;margin-top:0.5rem;">
                 <div style="font-weight:600;color:var(--primary);margin-bottom:0.25rem;" id="scanBookTitle"></div>
                 <div style="font-size:0.85rem;color:var(--gray-500);" id="scanBookInfo"></div>
-                <div style="margin-top:0.5rem;display:flex;gap:0.4rem;align-items:center;">
-                    <label style="font-size:0.8rem;font-weight:600;color:var(--gray-500);">Status:</label>
-                    <select id="scanBookStatus" style="flex:1;padding:0.35rem 0.5rem;border:1px solid var(--gray-300);border-radius:6px;font-size:0.85rem;font-family:inherit;">
-                        <option value="to-read">To be read (TBR)</option>
-                        <option value="currently-reading">Currently reading</option>
-                        <option value="read">Read</option>
-                    </select>
-                </div>
+                
             </div>
             <div style="margin-top:0.75rem;display:flex;gap:0.4rem;align-items:center;">
                 <input type="text" id="manualIsbn" placeholder="Or type ISBN here..." style="flex:1;padding:0.4rem 0.6rem;border:1px solid var(--gray-300);border-radius:6px;font-size:0.85rem;font-family:inherit;">
