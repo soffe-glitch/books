@@ -1012,35 +1012,54 @@
             .header p { font-size: 0.8rem; }
             .header-actions { gap: 0.5rem; }
             .header-btn { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
-
             .tab-button { padding: 0.7rem 0.25rem; font-size: 0.8rem; }
-
             .container { padding: 0.75rem; }
-
             .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
             .charts-section { grid-template-columns: 1fr; }
-
-            /* Books table: horizontal scroll */
-            .books-table, .recently-read-table { font-size: 0.8rem; }
-            .books-table th, .books-table td,
-            .recently-read-table th, .recently-read-table td { padding: 0.4rem; }
-
             .filter-buttons { gap: 0.25rem; }
             .filter-button { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
-
-            /* Reading Journey heatmap: scroll horizontally if many years */
-            .journey-year-headers, .journey-row { overflow-x: auto; }
+            /* === FIX 1: All Books table card layout === */
+            .books-table-wrapper { overflow: visible !important; }
+            .books-table { font-size: 0.85rem; }
+            .books-table thead { display: none; }
+            .books-table tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 0.75rem; padding: 0.9rem; margin-bottom: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; border-left: 4px solid var(--accent); background: var(--white); position: relative; }
+            .books-table tbody tr:hover { background: var(--gray-50); }
+            .books-table td { padding: 0; border-bottom: none; }
+            .books-table td:nth-child(1) { grid-column: 1 / -1; font-weight: 600; font-size: 0.95rem; color: var(--gray-900); }
+            .books-table td:nth-child(2) { grid-column: 1 / -1; color: var(--gray-500); font-size: 0.82rem; }
+            .books-table td:nth-child(3) { grid-column: 1; }
+            .books-table td:nth-child(4) { grid-column: 2; }
+            .books-table td:nth-child(5) { grid-column: 1 / -1; }
+            .books-table td:nth-child(6) { display: none; }
+            .books-table td:nth-child(7) { grid-column: 1; font-size: 0.78rem; color: var(--gray-400); }
+            .books-table td:nth-child(7)::before { content: 'Pages: '; }
+            .books-table td:nth-child(8) { display: none; }
+            .books-table td:nth-child(9) { grid-column: 2; font-size: 0.78rem; color: var(--gray-400); text-align: right; }
+            .books-table td:nth-child(10) { position: absolute; top: 0.75rem; right: 0.5rem; }
+            /* === FIX 2: Reading Journey heatmap === */
+            #readingJourney { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem; }
+            .journey-grid { min-width: max-content; }
+            .journey-year-headers { min-width: max-content; }
+            .journey-row { min-width: max-content; }
             .journey-cell { width: 28px; height: 20px; min-width: 28px; }
             .journey-year-header { width: 31px; min-width: 31px; font-size: 0.65rem; }
-
+            /* === FIX 3: Recently Read table card layout === */
+            .recently-read-table { font-size: 0.85rem; }
+            .recently-read-table thead { display: none; }
+            .recently-read-table tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid var(--gray-100); border-radius: 8px; border-left: 3px solid var(--accent); }
+            .recently-read-table td { padding: 0; border-bottom: none; }
+            .recently-read-table td:nth-child(1) { grid-column: 1 / -1; font-weight: 600; color: var(--gray-900); }
+            .recently-read-table td:nth-child(2) { grid-column: 1; color: var(--gray-500); font-size: 0.8rem; }
+            .recently-read-table td:nth-child(3) { grid-column: 2; text-align: right; }
+            .recently-read-table td:nth-child(4) { grid-column: 1 / -1; font-size: 0.75rem; color: var(--gray-400); }
+            /* === FIX 4: Add/Edit Book modal scrollable === */
+            .modal-overlay.open { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1rem 0; }
+            .modal { padding: 1.25rem; width: 100%; max-height: none; margin: auto 0; border-radius: 8px; flex-shrink: 0; }
+            .form-row { grid-template-columns: 1fr; }
             /* Reading Speed */
             .speed-big .speed-value { font-size: 1.75rem; }
-
             /* Currently reading / TBR cards */
             .cr-cards { flex-direction: column; }
-
-            /* Modals */
-            .modal { padding: 1.25rem; width: 100%; }
         }
         /* Modal */
         .modal-overlay {
@@ -1273,7 +1292,7 @@
                     <div id="monthlyChart"></div>
                 </div>
                 <div class="stats-panel">
-                    <h3 id="tagYearTitle">Tags — 2026</h3>
+                    <h3 id="tagYearTitle">Tags â 2026</h3>
                     <div id="tagChartYear"></div>
                 </div>
             </div>
@@ -1470,9 +1489,9 @@
             for (let i = 1; i <= 5; i++) {
                 const starClass = i <= filled ? 'filled' : 'empty';
                 if (clickable) {
-                    html += '<span class="star ' + starClass + '" onclick="updateRating(' + bookId + ', ' + i + ')" data-rating="' + i + '">★</span>';
+                    html += '<span class="star ' + starClass + '" onclick="updateRating(' + bookId + ', ' + i + ')" data-rating="' + i + '">â</span>';
                 } else {
-                    html += '<span class="star ' + starClass + '">★</span>';
+                    html += '<span class="star ' + starClass + '">â</span>';
                 }
             }
             html += '</div>';
@@ -1509,13 +1528,13 @@
                         const started = new Date(b.date_started.replace(/\//g, '-'));
                         const now = new Date();
                         const days = Math.ceil((now - started) / (1000 * 60 * 60 * 24));
-                        durationHtml = '<div class="cr-card-duration">Day ' + days + ' · started ' + b.date_started + '</div>';
+                        durationHtml = '<div class="cr-card-duration">Day ' + days + ' Â· started ' + b.date_started + '</div>';
                     }
                     crHtml += `
                         <div class="cr-card">
                             <div class="cr-card-title">${b.title}</div>
                             <div class="cr-card-author">${b.author || 'Unknown author'}</div>
-                            <div class="cr-card-meta">${details.join(' · ')}</div>
+                            <div class="cr-card-meta">${details.join(' Â· ')}</div>
                             ${durationHtml}
                             <div class="cr-card-actions">
                                 <button class="btn-finished" onclick="markFinished(${b.id}, this)">&#10003; Finished</button>
@@ -1525,7 +1544,7 @@
                 });
                 crHtml += '</div>';
             } else {
-                crHtml += '<div class="cr-empty">No books currently being read — pick one from your TBR!</div>';
+                crHtml += '<div class="cr-empty">No books currently being read â pick one from your TBR!</div>';
             }
             document.getElementById('currentlyReadingSection').innerHTML = crHtml;
 
@@ -1563,7 +1582,7 @@
                 <div class="tbr-pick-card">
                     <div class="cr-card-title">${b.title}</div>
                     <div class="cr-card-author">${b.author || 'Unknown author'}</div>
-                    <div class="cr-card-meta">${details.join(' · ')}</div>
+                    <div class="cr-card-meta">${details.join(' Â· ')}</div>
                     <div class="tbr-pick-actions">
                         <button class="btn-start-reading" onclick="startReading(${b.id}, this)">Start Reading</button>
                         <button class="btn-pick-again" onclick="pickRandomTbr()">Pick another</button>
@@ -1592,7 +1611,7 @@
                 const book = books.find(b => b.id === bookId);
                 if (book) { book.status = 'currently-reading'; book.date_started = dateStarted; }
                 tbrPickedBook = null;
-                showToast('"' + (book ? book.title : 'Book') + '" — started reading!');
+                showToast('"' + (book ? book.title : 'Book') + '" â started reading!');
                 if (currentTab === 'overview') renderOverviewTab();
                 else if (currentTab === 'books') { applyFilters(); renderBooksTable(); renderBooksPagination(); }
             } catch (e) {
@@ -1621,7 +1640,7 @@
                     <h3>Rate "${book.title}"</h3>
                     <p class="rating-dialog-sub">How would you rate this book?</p>
                     <div class="rating-dialog-stars" id="dialogStars">
-                        ${[1,2,3,4,5].map(i => `<span class="rating-star" data-val="${i}" onclick="selectDialogRating(${i})">★</span>`).join('')}
+                        ${[1,2,3,4,5].map(i => `<span class="rating-star" data-val="${i}" onclick="selectDialogRating(${i})">â</span>`).join('')}
                     </div>
                     <div class="rating-dialog-selected" id="dialogRatingLabel">No rating</div>
                     <div class="rating-dialog-actions">
@@ -1751,7 +1770,7 @@
                     const platforms = getPlatforms(b);
                     let platformHtml = '';
                     if (platforms.length === 0) {
-                        platformHtml = '<span style="color:#9ca3af">—</span>';
+                        platformHtml = '<span style="color:#9ca3af">â</span>';
                     } else {
                         platforms.forEach(p => {
                             platformHtml += '<span class="badge ' + getPlatformBadgeClass(p) + '">' + p + '</span>';
@@ -1760,7 +1779,7 @@
 
                     const ownershipHtml = b.ownership ? '<span class="badge ' + getOwnershipBadgeClass(b.ownership) + '">' + b.ownership + '</span>' : '<span class="badge badge-free">-</span>';
 
-                    const tagHtml = b.tag ? '<span class="badge badge-tag">' + b.tag + '</span>' : '<span style="color:#9ca3af">—</span>';
+                    const tagHtml = b.tag ? '<span class="badge badge-tag">' + b.tag + '</span>' : '<span style="color:#9ca3af">â</span>';
 
                     html += `
                         <tr>
@@ -1795,7 +1814,7 @@
 
             let ratingHtml = '<button class="filter-button active" data-filter-type="rating" data-filter-value="0" onclick="filterBooks(this)">All</button>';
             for (let i = 1; i <= 5; i++) {
-                const stars = '★'.repeat(i);
+                const stars = 'â'.repeat(i);
                 ratingHtml += '<button class="filter-button" data-filter-type="rating" data-filter-value="' + i + '" onclick="filterBooks(this)">' + stars + '</button>';
             }
             document.getElementById('ratingFilters').innerHTML = ratingHtml;
@@ -1826,14 +1845,14 @@
 
         function renderBooksPagination() {
             const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
-            let html = '<button onclick="prevPage(' + "'books'" + ')" ' + (currentPage.books === 1 ? 'disabled' : '') + '>← Previous</button>';
+            let html = '<button onclick="prevPage(' + "'books'" + ')" ' + (currentPage.books === 1 ? 'disabled' : '') + '>â Previous</button>';
             
             for (let i = 1; i <= totalPages; i++) {
                 const active = i === currentPage.books ? ' active' : '';
                 html += '<button class="' + active + '" onclick="goToPage(' + "'books'" + ', ' + i + ')">' + i + '</button>';
             }
             
-            html += '<button onclick="nextPage(' + "'books'" + ')" ' + (currentPage.books === totalPages ? 'disabled' : '') + '>Next →</button>';
+            html += '<button onclick="nextPage(' + "'books'" + ')" ' + (currentPage.books === totalPages ? 'disabled' : '') + '>Next â</button>';
             document.getElementById('booksPagination').innerHTML = html;
         }
 
@@ -1880,10 +1899,10 @@
                 <div class="stat-card"><div class="label">Average Rating</div><div class="value">${avgRating}</div></div>
                 <div class="stat-card"><div class="label">Unique Authors</div><div class="value">${uniqueAuthors}</div></div>
                 <div class="stat-card"><div class="label">5-Star Books</div><div class="value">${fiveStarBooks}</div></div>
-                <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
+                <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : 'â'}</div></div>
             `;
 
-            // Year tracker — pace for current year
+            // Year tracker â pace for current year
             document.getElementById('yearTrackerTitle').textContent = currentYear + ' Reading Pace';
             const now = new Date();
             const startOfYear = new Date(currentYear, 0, 1);
@@ -1926,8 +1945,8 @@
             });
             document.getElementById('monthlyChart').innerHTML = monthlyHtml;
 
-            // Tag breakdown — current year
-            document.getElementById('tagYearTitle').textContent = 'Tags — ' + currentYear;
+            // Tag breakdown â current year
+            document.getElementById('tagYearTitle').textContent = 'Tags â ' + currentYear;
             const tagCountsYear = {};
             booksThisYear.forEach(b => { const t = b.tag || 'Untagged'; tagCountsYear[t] = (tagCountsYear[t] || 0) + 1; });
             const maxTagYear = Math.max(...Object.values(tagCountsYear), 1);
@@ -1952,13 +1971,13 @@
                     const s = new Date(b.date_started.replace(/\//g, '-'));
                     const e = new Date(b.date_read.replace(/\//g, '-'));
                     const days = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
-                    if (days >= 0) durationText = '<span style="color:var(--gray-400); font-size:0.8rem;"> · ' + days + (days === 1 ? ' day' : ' days') + '</span>';
+                    if (days >= 0) durationText = '<span style="color:var(--gray-400); font-size:0.8rem;"> Â· ' + days + (days === 1 ? ' day' : ' days') + '</span>';
                 }
                 recentHtml += `<tr><td>${b.title}${tagBadge}</td><td>${b.author}</td><td>${renderStars(b.my_rating)}</td><td>${b.date_read}${durationText}</td></tr>`;
             });
             document.getElementById('recentlyReadBody').innerHTML = recentHtml;
 
-            // Reading Journey — compact GitHub-style heatmap
+            // Reading Journey â compact GitHub-style heatmap
             const readBooks = books.filter(b => b.date_read && b.status === 'read');
             const byYear = {};
             readBooks.forEach(b => {
@@ -2048,8 +2067,8 @@
 
                 speedHtml += '<div class="speed-big"><span class="speed-value">' + avgDays + '</span><span class="speed-unit">days avg per book</span></div>';
                 speedHtml += '<div class="speed-records">';
-                speedHtml += '<div class="speed-record"><span class="speed-record-icon">⚡</span><div class="speed-record-info"><span class="speed-record-title">' + (fastest.title || '').replace(/</g,'&lt;') + '</span><span class="speed-record-meta">' + fastest.readingDays + ' day' + (fastest.readingDays !== 1 ? 's' : '') + ' · ' + (fastest.author || '') + '</span></div></div>';
-                speedHtml += '<div class="speed-record"><span class="speed-record-icon">🐢</span><div class="speed-record-info"><span class="speed-record-title">' + (slowest.title || '').replace(/</g,'&lt;') + '</span><span class="speed-record-meta">' + slowest.readingDays + ' day' + (slowest.readingDays !== 1 ? 's' : '') + ' · ' + (slowest.author || '') + '</span></div></div>';
+                speedHtml += '<div class="speed-record"><span class="speed-record-icon">â¡</span><div class="speed-record-info"><span class="speed-record-title">' + (fastest.title || '').replace(/</g,'&lt;') + '</span><span class="speed-record-meta">' + fastest.readingDays + ' day' + (fastest.readingDays !== 1 ? 's' : '') + ' Â· ' + (fastest.author || '') + '</span></div></div>';
+                speedHtml += '<div class="speed-record"><span class="speed-record-icon">ð¢</span><div class="speed-record-info"><span class="speed-record-title">' + (slowest.title || '').replace(/</g,'&lt;') + '</span><span class="speed-record-meta">' + slowest.readingDays + ' day' + (slowest.readingDays !== 1 ? 's' : '') + ' Â· ' + (slowest.author || '') + '</span></div></div>';
                 speedHtml += '</div>';
             } else {
                 speedHtml = '<div style="color:var(--gray-400); font-size:0.85rem;">Add start dates to your books to see reading speed stats.</div>';
@@ -2289,7 +2308,7 @@
                     <div class="form-group">
                         <label>Format</label>
                         <select id="addBookFormat">
-                            <option value="">—</option>
+                            <option value="">â</option>
                             <option value="ebook">ebook</option>
                             <option value="Kindle Edition">Kindle Edition</option>
                             <option value="Hardcover">Hardcover</option>
@@ -2299,7 +2318,7 @@
                     <div class="form-group">
                         <label>Ownership</label>
                         <select id="addBookOwnership">
-                            <option value="">—</option>
+                            <option value="">â</option>
                             <option value="Owned">Owned</option>
                             <option value="Streamed">Streamed</option>
                             <option value="Borrowed">Borrowed</option>
@@ -2322,11 +2341,11 @@
                         <label>My Rating</label>
                         <select id="addBookRating">
                             <option value="0">Not rated</option>
-                            <option value="5">★★★★★</option>
-                            <option value="4">★★★★</option>
-                            <option value="3">★★★</option>
-                            <option value="2">★★</option>
-                            <option value="1">★</option>
+                            <option value="5">âââââ</option>
+                            <option value="4">ââââ</option>
+                            <option value="3">âââ</option>
+                            <option value="2">ââ</option>
+                            <option value="1">â</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -2404,7 +2423,7 @@
                     <div class="form-group">
                         <label>Format</label>
                         <select id="editBookFormat">
-                            <option value="">—</option>
+                            <option value="">â</option>
                             <option value="ebook">ebook</option>
                             <option value="Kindle Edition">Kindle Edition</option>
                             <option value="Hardcover">Hardcover</option>
@@ -2414,7 +2433,7 @@
                     <div class="form-group">
                         <label>Ownership</label>
                         <select id="editBookOwnership">
-                            <option value="">—</option>
+                            <option value="">â</option>
                             <option value="Owned">Owned</option>
                             <option value="Streamed">Streamed</option>
                             <option value="Borrowed">Borrowed</option>
@@ -2437,11 +2456,11 @@
                         <label>My Rating</label>
                         <select id="editBookRating">
                             <option value="0">Not rated</option>
-                            <option value="5">★★★★★</option>
-                            <option value="4">★★★★</option>
-                            <option value="3">★★★</option>
-                            <option value="2">★★</option>
-                            <option value="1">★</option>
+                            <option value="5">âââââ</option>
+                            <option value="4">ââââ</option>
+                            <option value="3">âââ</option>
+                            <option value="2">ââ</option>
+                            <option value="1">â</option>
                         </select>
                     </div>
                     <div class="form-group">
