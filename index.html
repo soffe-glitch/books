@@ -2488,22 +2488,50 @@
             startScanner();
         }
 
-        function addScannedBook() {
+        async function addScannedBook() {
             if (!scannedBookData) return;
-            closeScanModal();
-            openAddBookModal();
+            const btn = document.getElementById('scanAddBtn');
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
 
-            setTimeout(() => {
-                document.getElementById('addBookTitle').value = scannedBookData.title;
-                document.getElementById('addBookAuthor').value = scannedBookData.author;
-                if (scannedBookData.pages) document.getElementById('addBookPages').value = scannedBookData.pages;
-                if (scannedBookData.year) document.getElementById('addBookYear').value = scannedBookData.year;
-                document.getElementById('addBookFormat').value = scannedBookData.format;
-                document.getElementById('addBookOwnership').value = 'Owned';
-                const physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
-                if (physicalCheck) physicalCheck.checked = true;
-                document.getElementById('addBookStatus').value = 'read';
-            }, 100);
+            const status = document.getElementById('scanBookStatus').value;
+            const today = new Date().toISOString().slice(0,10).replace(/-/g, '/');
+
+            const newBook = {
+                title: scannedBookData.title,
+                author: scannedBookData.author,
+                my_rating: 0,
+                avg_rating: 0,
+                pages: scannedBookData.pages || 0,
+                format: scannedBookData.format || 'Paperback',
+                platform: 'Physical',
+                ownership: 'Owned',
+                date_read: '',
+                date_added: today,
+                year_published: scannedBookData.year || 0,
+                status: status,
+                tag: null,
+                publisher: '',
+                word_count: 0
+            };
+
+            try {
+                const insertedBook = await supabase.insertBook(newBook);
+                books.unshift(insertedBook);
+                closeScanModal();
+
+                if (currentTab === 'overview') renderOverviewTab();
+                else if (currentTab === 'books') { booksFiltersRendered = false; renderBooksTab(); }
+                else if (currentTab === 'stats') renderStatsTab();
+
+                showToast('\u2705 "' + scannedBookData.title + '" added!');
+            } catch (err) {
+                console.error(err);
+                btn.textContent = 'Add This Book';
+                btn.disabled = false;
+                document.getElementById('scanError').style.display = 'block';
+                document.getElementById('scanError').textContent = 'Save failed: ' + err.message;
+            }
         }
     </script>
 
@@ -2626,13 +2654,21 @@
     <!-- ISBN SCANNER MODAL -->
     <div class="modal-overlay" id="scanModal" onclick="if(event.target===this)closeScanModal()">
         <div class="modal" style="max-width:400px;">
-            <h2>\u{1F4F7} Scan ISBN Barcode</h2>
+            <h2>📷 Scan ISBN Barcode</h2>
             <div id="scanReader" style="width:100%;border-radius:8px;overflow:hidden;"></div>
             <div id="scanStatus" style="text-align:center;padding:0.5rem;color:var(--gray-500);font-size:0.85rem;">Point your camera at an ISBN barcode</div>
             <div id="scanError" style="display:none;padding:0.6rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-top:0.5rem;color:#991b1b;font-size:0.85rem;text-align:center;"></div>
             <div id="scanResult" style="display:none;padding:0.75rem;background:var(--accent-light);border-radius:8px;margin-top:0.5rem;">
                 <div style="font-weight:600;color:var(--primary);margin-bottom:0.25rem;" id="scanBookTitle"></div>
                 <div style="font-size:0.85rem;color:var(--gray-500);" id="scanBookInfo"></div>
+                <div style="margin-top:0.5rem;display:flex;gap:0.4rem;align-items:center;">
+                    <label style="font-size:0.8rem;font-weight:600;color:var(--gray-500);">Status:</label>
+                    <select id="scanBookStatus" style="flex:1;padding:0.35rem 0.5rem;border:1px solid var(--gray-300);border-radius:6px;font-size:0.85rem;font-family:inherit;">
+                        <option value="to-read">To be read (TBR)</option>
+                        <option value="currently-reading">Currently reading</option>
+                        <option value="read">Read</option>
+                    </select>
+                </div>
             </div>
             <div style="margin-top:0.75rem;display:flex;gap:0.4rem;align-items:center;">
                 <input type="text" id="manualIsbn" placeholder="Or type ISBN here..." style="flex:1;padding:0.4rem 0.6rem;border:1px solid var(--gray-300);border-radius:6px;font-size:0.85rem;font-family:inherit;">
