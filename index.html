@@ -2439,56 +2439,24 @@
             document.getElementById('scanStatus').textContent = 'Found ISBN: ' + isbn + ' \u2014 looking up...';
 
             try {
-                // Try Open Library first
-                const resp = await fetch('https://openlibrary.org/isbn/' + isbn + '.json');
-                if (!resp.ok) throw new Error('Not found');
-                const book = await resp.json();
+                const resp = await fetch('https://fhlotfddxcpczokbvzdq.supabase.co/functions/v1/isbn-lookup?isbn=' + isbn);
+                const data = await resp.json();
 
-                let authorName = 'Unknown';
-                if (book.authors && book.authors.length > 0) {
-                    const authorKey = book.authors[0].key || book.authors[0];
-                    try {
-                        const aResp = await fetch('https://openlibrary.org' + authorKey + '.json');
-                        const aData = await aResp.json();
-                        authorName = aData.name || 'Unknown';
-                    } catch(e) {}
-                }
-
-                let year = 0;
-                if (book.publish_date) {
-                    const m = book.publish_date.match(/\d{4}/);
-                    if (m) year = parseInt(m[0]);
+                if (!resp.ok || data.error) {
+                    showScanError(isbn, data.error || 'Book not found. Try entering it manually.');
+                    return;
                 }
 
                 scannedBookData = {
-                    title: book.title || '',
-                    author: authorName,
-                    pages: book.number_of_pages || 0,
-                    year: year,
-                    format: book.physical_format ? (book.physical_format.toLowerCase().includes('hard') ? 'Hardcover' : 'Paperback') : 'Paperback'
+                    title: data.title || '',
+                    author: data.author || 'Unknown',
+                    pages: data.pages || 0,
+                    year: data.year || 0,
+                    format: data.format || 'Paperback'
                 };
-                showScannedResult(isbn, '');
+                showScannedResult(isbn, ' (' + data.source + ')');
             } catch (err) {
-                // Fallback: Google Books API
-                try {
-                    const gResp = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn);
-                    const gData = await gResp.json();
-                    if (gData.items && gData.items.length > 0) {
-                        const vol = gData.items[0].volumeInfo;
-                        scannedBookData = {
-                            title: vol.title || '',
-                            author: (vol.authors || ['Unknown']).join(', '),
-                            pages: vol.pageCount || 0,
-                            year: vol.publishedDate ? parseInt(vol.publishedDate.substring(0,4)) : 0,
-                            format: 'Paperback'
-                        };
-                        showScannedResult(isbn, ' (Google Books)');
-                    } else {
-                        showScanError(isbn, 'Book not found in any database. Try another ISBN or enter details manually.');
-                    }
-                } catch (e2) {
-                    showScanError(isbn, 'Network error during lookup. Check your connection.');
-                }
+                showScanError(isbn, 'Network error: ' + err.message);
             }
         }
 
@@ -2509,7 +2477,6 @@
             document.getElementById('scanError').textContent = message;
             document.getElementById('scanResult').style.display = 'none';
             document.getElementById('scanAddBtn').style.display = 'none';
-            // Let user see the error - don't auto-restart
             isLookingUp = false;
         }
 
