@@ -1977,10 +1977,12 @@
             // Books read this year
             const booksThisYear = books.filter(b => b.date_read && b.date_read.startsWith(String(currentYear)));
             const booksReadThisYear = booksThisYear.length;
+            const pagesThisYear = booksThisYear.reduce((sum, b) => sum + (b.number_of_pages || 0), 0);
 
             document.getElementById('overviewStats').innerHTML = `
                 <div class="stat-card"><div class="label">Total Books</div><div class="value">${books.length}</div></div>
                 <div class="stat-card"><div class="label">Read in ${currentYear}</div><div class="value">${booksReadThisYear}</div></div>
+                <div class="stat-card"><div class="label">Pages in ${currentYear}</div><div class="value">${pagesThisYear > 0 ? pagesThisYear.toLocaleString() : '\u2014'}</div></div>
                 <div class="stat-card"><div class="label">Currently Reading</div><div class="value">${currentlyReading}</div></div>
                 <div class="stat-card"><div class="label">TBR</div><div class="value">${toBeRead}</div></div>
                 <div class="stat-card"><div class="label">Average Rating</div><div class="value">${avgRating}</div></div>
