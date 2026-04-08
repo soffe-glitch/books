@@ -1968,7 +1968,7 @@
             const currentYear = new Date().getFullYear();
             const rated = books.filter(b => b.my_rating > 0);
             const avgRating = rated.length > 0 ? (rated.reduce((sum, b) => sum + b.my_rating, 0) / rated.length).toFixed(2) : 0;
-            const totalWords = books.reduce((sum, b) => sum + (b.word_count || 0), 0);
+            const totalWords = books.reduce((sum, b) => sum + (b.word_count || (b.pages ? b.pages * 250 : 0)), 0);
             const currentlyReading = books.filter(b => b.status === 'currently-reading').length;
             const toBeRead = books.filter(b => b.status === 'to-read').length;
             const uniqueAuthors = new Set(books.map(b => b.author)).size;
@@ -1988,7 +1988,7 @@
                 <div class="stat-card"><div class="label">Average Rating</div><div class="value">${avgRating}</div></div>
                 <div class="stat-card"><div class="label">Unique Authors</div><div class="value">${uniqueAuthors}</div></div>
                 <div class="stat-card"><div class="label">5-Star Books</div><div class="value">${fiveStarBooks}</div></div>
-                <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
+                <div class="stat-card"><div class="label">Est. Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
             `;
 
             // Year tracker — pace for current year
