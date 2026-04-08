@@ -2382,6 +2382,7 @@
             document.getElementById('scanResult').style.display = 'none';
             document.getElementById('scanAddBtn').style.display = 'none';
             document.getElementById('scanError').style.display = 'none';
+            document.getElementById('scanDupeWarning').style.display = 'none';
             document.getElementById('scanStatus').textContent = 'Starting camera...';
             document.getElementById('manualIsbn').value = '';
             scannedBookData = null;
@@ -2484,6 +2485,36 @@
             document.getElementById('scanResult').style.display = 'block';
             document.getElementById('scanAddBtn').style.display = 'inline-flex';
             document.getElementById('scanError').style.display = 'none';
+
+            // Duplicate check against existing books
+            var dupeW = document.getElementById('scanDupeWarning');
+            dupeW.style.background = '#fefce8';
+            dupeW.style.borderColor = '#fde68a';
+            dupeW.style.color = '#92400e';
+            var scT = (scannedBookData.title || '').toLowerCase().trim();
+            var scA = (scannedBookData.author || '').toLowerCase().trim();
+            var dupes = books.filter(function(b) {
+                return (b.title || '').toLowerCase().trim() === scT && (b.author || '').toLowerCase().trim() === scA;
+            });
+            if (dupes.length > 0) {
+                var eds = dupes.map(function(b) {
+                    var p = [];
+                    if (b.format) p.push(b.format);
+                    var pl = (b.platforms || '').split(',').map(function(x){return x.trim();}).filter(Boolean);
+                    if (pl.length) p.push(pl.join(', '));
+                    return p.join(' \u00B7 ') || 'Unknown format';
+                });
+                dupeW.innerHTML = '\u26A0\uFE0F You already have this book:<br>' +
+                    eds.map(function(e){return '<span style="margin-left:0.5rem;">\u2022 ' + e + '</span>';}).join('<br>') +
+                    '<br><span style="font-size:0.75rem;color:#b45309;">You can still add it if this is a different edition.</span>';
+                dupeW.style.display = 'block';
+            } else {
+                dupeW.innerHTML = '\u2705 New book \u2014 not in your library yet';
+                dupeW.style.display = 'block';
+                dupeW.style.background = '#f0fdf4';
+                dupeW.style.borderColor = '#bbf7d0';
+                dupeW.style.color = '#166534';
+            }
         }
 
         function showScanError(isbn, message) {
@@ -2688,6 +2719,7 @@
             <div id="scanResult" style="display:none;padding:0.75rem;background:var(--accent-light);border-radius:8px;margin-top:0.5rem;">
                 <div style="font-weight:600;color:var(--primary);margin-bottom:0.25rem;" id="scanBookTitle"></div>
                 <div style="font-size:0.85rem;color:var(--gray-500);" id="scanBookInfo"></div>
+                <div id="scanDupeWarning" style="display:none;margin-top:0.5rem;padding:0.5rem;background:#fefce8;border:1px solid #fde68a;border-radius:6px;font-size:0.8rem;color:#92400e;"></div>
                 
             </div>
             <div style="margin-top:0.75rem;display:flex;gap:0.4rem;align-items:center;">
