@@ -1770,7 +1770,7 @@
                             <td>${tagHtml}</td>
                             <td>${platformHtml}</td>
                             <td>${ownershipHtml}</td>
-                            <td>${b.pages ? b.pages : (b.word_count > 0 ? '<span style="color:var(--accent)" title="Calculated from word count">' + Math.ceil(b.word_count / 220).toLocaleString() + '</span>' : '-')}</td>
+                            <td>${b.pages ? b.pages : (b.word_count > 0 ? '<span style="color:var(--accent)" title="Calculated from word count">' + Math.ceil(b.word_count / 250).toLocaleString() + '</span>' : '-')}</td>
                             <td>${b.word_count ? b.word_count.toLocaleString() : '-'}</td>
                             <td>${b.date_read || '-'}</td>
                             <td style="white-space:nowrap">
@@ -1871,8 +1871,8 @@
             // Books read this year
             const booksThisYear = books.filter(b => b.date_read && b.date_read.startsWith(String(currentYear)));
             const booksReadThisYear = booksThisYear.length;
-            // Pages: use b.pages if set, otherwise estimate from word_count (220 words/page) — matches table display
-            const effectivePages = b => b.pages || (b.word_count > 0 ? Math.ceil(b.word_count / 220) : 0);
+            // Pages: use b.pages if set, otherwise estimate from word_count (250 words/page — hardback standard) — matches table display
+            const effectivePages = b => b.pages || (b.word_count > 0 ? Math.ceil(b.word_count / 250) : 0);
             const pagesReadThisYear = booksThisYear.reduce((sum, b) => sum + effectivePages(b), 0);
 
             document.getElementById('overviewStats').innerHTML = `
@@ -2373,7 +2373,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Word Count</label>
-                        <input type="number" id="addBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('addBookPages').value) document.getElementById('addBookPages').value = Math.ceil(this.value / 220)">
+                        <input type="number" id="addBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('addBookPages').value) document.getElementById('addBookPages').value = Math.ceil(this.value / 250)">
                     </div>
                     <div class="form-group">
                         <label style="color:var(--gray-400); font-size:0.85rem;">Pages auto-fills from word count if empty</label>
@@ -2495,7 +2495,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Word Count</label>
-                        <input type="number" id="editBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('editBookPages').value) document.getElementById('editBookPages').value = Math.ceil(this.value / 220)">
+                        <input type="number" id="editBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('editBookPages').value) document.getElementById('editBookPages').value = Math.ceil(this.value / 250)">
                     </div>
                     <div class="form-group">
                         <label style="color:var(--gray-400); font-size:0.85rem;">Pages auto-fills from word count if empty</label>
