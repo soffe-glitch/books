@@ -1012,76 +1012,35 @@
             .header p { font-size: 0.8rem; }
             .header-actions { gap: 0.5rem; }
             .header-btn { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+
             .tab-button { padding: 0.7rem 0.25rem; font-size: 0.8rem; }
+
             .container { padding: 0.75rem; }
+
             .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
             .charts-section { grid-template-columns: 1fr; }
+
+            /* Books table: horizontal scroll */
+            .books-table, .recently-read-table { font-size: 0.8rem; }
+            .books-table th, .books-table td,
+            .recently-read-table th, .recently-read-table td { padding: 0.4rem; }
+
             .filter-buttons { gap: 0.25rem; }
             .filter-button { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
-            /* === FIX 1: All Books table card layout === */
-            .books-table-wrapper { overflow: visible !important; }
-            .books-table { font-size: 0.85rem; }
-            .books-table thead { display: none; }
-            .books-table tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 0.75rem; padding: 0.9rem; margin-bottom: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; border-left: 4px solid var(--accent); background: var(--white); position: relative; }
-            .books-table tbody tr:hover { background: var(--gray-50); }
-            .books-table td { padding: 0; border-bottom: none; }
-            .books-table td:nth-child(1) { grid-column: 1 / -1; font-weight: 600; font-size: 0.95rem; color: var(--gray-900); }
-            .books-table td:nth-child(2) { grid-column: 1 / -1; color: var(--gray-500); font-size: 0.82rem; }
-            .books-table td:nth-child(3) { grid-column: 1; }
-            .books-table td:nth-child(4) { grid-column: 2; }
-            .books-table td:nth-child(5) { grid-column: 1 / -1; }
-            .books-table td:nth-child(6) { display: none; }
-            .books-table td:nth-child(7) { grid-column: 1; font-size: 0.78rem; color: var(--gray-400); }
-            .books-table td:nth-child(7)::before { content: 'Pages: '; }
-            .books-table td:nth-child(8) { display: none; }
-            .books-table td:nth-child(9) { grid-column: 2; font-size: 0.78rem; color: var(--gray-400); text-align: right; }
-            .books-table td:nth-child(10) { position: absolute; top: 0.75rem; right: 0.5rem; }
-            /* === FIX 2: Reading Journey heatmap === */
-            #readingJourney { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem; }
-            .journey-grid { min-width: max-content; }
-            .journey-year-headers { min-width: max-content; }
-            .journey-row { min-width: max-content; }
+
+            /* Reading Journey heatmap: scroll horizontally if many years */
+            .journey-year-headers, .journey-row { overflow-x: auto; }
             .journey-cell { width: 28px; height: 20px; min-width: 28px; }
             .journey-year-header { width: 31px; min-width: 31px; font-size: 0.65rem; }
-            /* === FIX 3: Recently Read table card layout === */
-            .recently-read-table { font-size: 0.85rem; }
-            .recently-read-table thead { display: none; }
-            .recently-read-table tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; border: 1px solid var(--gray-100); border-radius: 8px; border-left: 3px solid var(--accent); }
-            .recently-read-table td { padding: 0; border-bottom: none; }
-            .recently-read-table td:nth-child(1) { grid-column: 1 / -1; font-weight: 600; color: var(--gray-900); }
-            .recently-read-table td:nth-child(2) { grid-column: 1; color: var(--gray-500); font-size: 0.8rem; }
-            .recently-read-table td:nth-child(3) { grid-column: 2; text-align: right; }
-            .recently-read-table td:nth-child(4) { grid-column: 1 / -1; font-size: 0.75rem; color: var(--gray-400); }
-            /* === FIX 4: Add/Edit Book modal scrollable === */
-            .modal-overlay.open {
-                align-items: center;
-                padding: 0.25rem;
-            }
-            .modal {
-                padding: 0.75rem 1rem;
-                width: 100%;
-                max-width: 100vw;
-                max-height: 95vh;
-                max-height: 95dvh;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                border-radius: 8px;
-            }
-            .modal h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
-            .modal-form { gap: 0.35rem; }
-            .form-row { gap: 0.35rem 0.5rem; }
-            .form-group { gap: 0.1rem; }
-            .form-group label { font-size: 0.7rem; }
-            .form-group input, .form-group select {
-                padding: 0.35rem 0.5rem;
-                font-size: 0.82rem;
-            }
-            .platform-checks { display: flex; flex-wrap: wrap; gap: 0 0.5rem; }
-            .platform-checks label { font-size: 0.8rem; }
-            .modal-actions { margin-top: 0.35rem; }
-            .btn-cancel, .btn-save { padding: 0.45rem 1.2rem; font-size: 0.85rem; }
+
+            /* Reading Speed */
             .speed-big .speed-value { font-size: 1.75rem; }
+
+            /* Currently reading / TBR cards */
             .cr-cards { flex-direction: column; }
+
+            /* Modals */
+            .modal { padding: 1.25rem; width: 100%; }
         }
         /* Modal */
         .modal-overlay {
@@ -1205,72 +1164,8 @@
             background: var(--accent-light);
         }
         .import-area p { color: var(--gray-500); margin-top: 0.5rem; font-size: 0.85rem; }
-
-        /* Mobile modal compact — placed AFTER base modal CSS for correct cascade */
-        @media (max-width: 768px) {
-            .modal-overlay.open {
-                align-items: flex-start !important;
-                padding: 0 !important;
-                overflow: hidden !important;
-            }
-            .modal {
-                padding: 0.6rem 0.5rem !important;
-                width: 100vw !important;
-                max-width: 100vw !important;
-                max-height: 100dvh !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
-                -webkit-overflow-scrolling: touch;
-                border-radius: 0 !important;
-                box-sizing: border-box !important;
-                margin: 0 !important;
-            }
-            .modal h2 { font-size: 1rem !important; margin-bottom: 0.25rem !important; }
-            .modal-form { gap: 0.15rem !important; }
-            .form-row {
-                grid-template-columns: 1fr 1fr !important;
-                gap: 0.1rem 0.35rem !important;
-            }
-            .form-group {
-                gap: 0rem !important;
-                min-width: 0 !important;
-                overflow: hidden !important;
-            }
-            .form-group label { font-size: 0.65rem !important; margin-bottom: 0 !important; }
-            .form-group input, .form-group select {
-                padding: 0.25rem 0.3rem !important;
-                font-size: 0.8rem !important;
-                min-width: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                box-sizing: border-box !important;
-            }
-            .platform-checks {
-                display: grid !important;
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 0 !important;
-            }
-            .platform-checks label {
-                font-size: 0.7rem !important;
-                margin: 0 !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-            }
-            .modal-actions { margin-top: 0.15rem !important; gap: 0.5rem !important; }
-            .btn-cancel, .btn-save { padding: 0.3rem 1rem !important; font-size: 0.8rem !important; }
-        }
-
-        /* Scan validation: highlight missing fields */
-        .scan-missing {
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 0 2px rgba(239,68,68,0.15) !important;
-        }
-        .scan-missing-label {
-            color: #ef4444 !important;
-        }
     </style>
 
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -1278,7 +1173,6 @@
         <p>Track your reading journey across all platforms</p>
         <div class="header-actions">
             <button class="header-btn" onclick="openAddBookModal()">+ Add Book</button>
-            <button class="header-btn" onclick="openScanModal()" style="background:var(--accent);">📷 Scan ISBN</button>
 
         </div>
     </div>
@@ -1968,7 +1862,7 @@
             const currentYear = new Date().getFullYear();
             const rated = books.filter(b => b.my_rating > 0);
             const avgRating = rated.length > 0 ? (rated.reduce((sum, b) => sum + b.my_rating, 0) / rated.length).toFixed(2) : 0;
-            const totalWords = books.reduce((sum, b) => sum + (b.word_count || (b.pages ? b.pages * 250 : 0)), 0);
+            const totalWords = books.reduce((sum, b) => sum + (b.word_count || 0), 0);
             const currentlyReading = books.filter(b => b.status === 'currently-reading').length;
             const toBeRead = books.filter(b => b.status === 'to-read').length;
             const uniqueAuthors = new Set(books.map(b => b.author)).size;
@@ -1977,18 +1871,20 @@
             // Books read this year
             const booksThisYear = books.filter(b => b.date_read && b.date_read.startsWith(String(currentYear)));
             const booksReadThisYear = booksThisYear.length;
-            const pagesThisYear = booksThisYear.reduce((sum, b) => sum + (b.pages || 0), 0);
+            // Pages: use b.pages if set, otherwise estimate from word_count (220 words/page) — matches table display
+            const effectivePages = b => b.pages || (b.word_count > 0 ? Math.ceil(b.word_count / 220) : 0);
+            const pagesReadThisYear = booksThisYear.reduce((sum, b) => sum + effectivePages(b), 0);
 
             document.getElementById('overviewStats').innerHTML = `
                 <div class="stat-card"><div class="label">Total Books</div><div class="value">${books.length}</div></div>
                 <div class="stat-card"><div class="label">Read in ${currentYear}</div><div class="value">${booksReadThisYear}</div></div>
-                <div class="stat-card"><div class="label">Pages in ${currentYear}</div><div class="value">${pagesThisYear > 0 ? pagesThisYear.toLocaleString() : '\u2014'}</div></div>
+                <div class="stat-card"><div class="label">Pages in ${currentYear}</div><div class="value">${pagesReadThisYear > 0 ? pagesReadThisYear.toLocaleString() : '—'}</div></div>
                 <div class="stat-card"><div class="label">Currently Reading</div><div class="value">${currentlyReading}</div></div>
                 <div class="stat-card"><div class="label">TBR</div><div class="value">${toBeRead}</div></div>
                 <div class="stat-card"><div class="label">Average Rating</div><div class="value">${avgRating}</div></div>
                 <div class="stat-card"><div class="label">Unique Authors</div><div class="value">${uniqueAuthors}</div></div>
                 <div class="stat-card"><div class="label">5-Star Books</div><div class="value">${fiveStarBooks}</div></div>
-                <div class="stat-card"><div class="label">Est. Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
+                <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
             `;
 
             // Year tracker — pace for current year
@@ -2000,7 +1896,6 @@
             const totalDays = 365 + (currentYear % 4 === 0 ? 1 : 0);
             const pacePerMonth = booksReadThisYear > 0 ? (booksReadThisYear / daysElapsed * 30.44).toFixed(1) : 0;
             const projectedTotal = booksReadThisYear > 0 ? Math.round(booksReadThisYear / daysElapsed * totalDays) : 0;
-            const projectedPages = pagesThisYear > 0 ? Math.round(pagesThisYear / daysElapsed * totalDays).toLocaleString() : 0;
 
             const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             const monthlyCounts = new Array(12).fill(0);
@@ -2013,7 +1908,7 @@
             trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--primary)">' + booksReadThisYear + '</div><div class="pace-label">books read</div></div>';
             trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--accent)">' + pacePerMonth + '</div><div class="pace-label">per month</div></div>';
             trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--gray-400)">' + projectedTotal + '</div><div class="pace-label">projected EOY</div></div>';
-            trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--gray-400)">' + projectedPages + '</div><div class="pace-label">pages projected</div></div>';
+            trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--primary)">' + (pagesReadThisYear > 0 ? pagesReadThisYear.toLocaleString() : '—') + '</div><div class="pace-label">pages read</div></div>';
             trackerHtml += '</div>';
 
             // Progress bar
@@ -2317,8 +2212,6 @@
         function closeAddBookModal() {
             document.getElementById('addBookModal').classList.remove('open');
             document.getElementById('addBookForm').reset();
-            document.querySelectorAll('.scan-missing').forEach(el => el.classList.remove('scan-missing'));
-            document.querySelectorAll('.scan-missing-label').forEach(el => el.classList.remove('scan-missing-label'));
         }
 
         async function saveNewBook() {
@@ -2374,227 +2267,6 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-
-
-        // ============ ISBN SCANNER ============
-        let html5QrCode = null;
-        let scannedBookData = null;
-        let isLookingUp = false;
-
-        function openScanModal() {
-            document.getElementById('scanModal').classList.add('open');
-            document.getElementById('scanResult').style.display = 'none';
-            document.getElementById('scanAddBtn').style.display = 'none';
-            document.getElementById('scanError').style.display = 'none';
-            document.getElementById('scanDupeWarning').style.display = 'none';
-            document.getElementById('scanStatus').textContent = 'Starting camera...';
-            document.getElementById('manualIsbn').value = '';
-            scannedBookData = null;
-            isLookingUp = false;
-            startScanner();
-        }
-
-        function closeScanModal() {
-            document.getElementById('scanModal').classList.remove('open');
-            stopScanner();
-        }
-
-        async function startScanner() {
-            try {
-                if (html5QrCode) {
-                    try { await html5QrCode.stop(); } catch(e) {}
-                    html5QrCode = null;
-                }
-                html5QrCode = new Html5Qrcode('scanReader');
-                await html5QrCode.start(
-                    { facingMode: 'environment' },
-                    {
-                        fps: 10,
-                        qrbox: { width: 280, height: 120 },
-                        aspectRatio: 1.5,
-                        formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8 ]
-                    },
-                    onScanSuccess,
-                    () => {}
-                );
-                document.getElementById('scanStatus').textContent = 'Point camera at ISBN barcode';
-            } catch (err) {
-                document.getElementById('scanStatus').textContent = 'Camera error: ' + err;
-            }
-        }
-
-        function stopScanner() {
-            try {
-                if (html5QrCode) {
-                    html5QrCode.stop().catch(() => {});
-                }
-            } catch(e) { /* scanner already stopped */ }
-        }
-
-        async function onScanSuccess(isbn) {
-            if (isLookingUp) return;
-            isLookingUp = true;
-            stopScanner();
-            await lookupISBN(isbn);
-        }
-
-        function manualLookup() {
-            const isbn = document.getElementById('manualIsbn').value.trim().replace(/[-\s]/g, '');
-            if (!isbn || isbn.length < 10) {
-                document.getElementById('scanError').style.display = 'block';
-                document.getElementById('scanError').textContent = 'Enter a valid ISBN (10 or 13 digits)';
-                return;
-            }
-            stopScanner();
-            isLookingUp = true;
-            lookupISBN(isbn);
-        }
-
-        async function lookupISBN(isbn) {
-            document.getElementById('scanError').style.display = 'none';
-            document.getElementById('scanResult').style.display = 'none';
-            document.getElementById('scanAddBtn').style.display = 'none';
-            document.getElementById('scanStatus').textContent = 'Found ISBN: ' + isbn + ' \u2014 looking up...';
-
-            try {
-                const resp = await fetch('https://fhlotfddxcpczokbvzdq.supabase.co/functions/v1/isbn-lookup?isbn=' + isbn);
-                const data = await resp.json();
-
-                if (!resp.ok || data.error) {
-                    showScanError(isbn, data.error || 'Book not found. Try entering it manually.');
-                    return;
-                }
-
-                scannedBookData = {
-                    title: data.title || '',
-                    author: data.author || 'Unknown',
-                    pages: data.pages || 0,
-                    year: data.year || 0,
-                    format: data.format || 'Paperback',
-                    tag: data.tag || ''
-                };
-                showScannedResult(isbn, ' (' + data.source + ')');
-            } catch (err) {
-                showScanError(isbn, 'Network error: ' + err.message);
-            }
-        }
-
-        function showScannedResult(isbn, source) {
-            document.getElementById('scanStatus').textContent = 'ISBN: ' + isbn + source;
-            document.getElementById('scanBookTitle').textContent = scannedBookData.title;
-            document.getElementById('scanBookInfo').textContent = scannedBookData.author
-                + (scannedBookData.pages ? ' \u00B7 ' + scannedBookData.pages + ' pages' : '')
-                + (scannedBookData.year ? ' \u00B7 ' + scannedBookData.year : '')
-                + (scannedBookData.tag ? ' \u00B7 ' + scannedBookData.tag : '');
-            document.getElementById('scanResult').style.display = 'block';
-            document.getElementById('scanAddBtn').style.display = 'inline-flex';
-            document.getElementById('scanError').style.display = 'none';
-
-            // Duplicate check against existing books
-            var dupeW = document.getElementById('scanDupeWarning');
-            dupeW.style.background = '#fefce8';
-            dupeW.style.borderColor = '#fde68a';
-            dupeW.style.color = '#92400e';
-            var scT = (scannedBookData.title || '').toLowerCase().trim();
-            var scA = (scannedBookData.author || '').toLowerCase().trim();
-            var dupes = books.filter(function(b) {
-                return (b.title || '').toLowerCase().trim() === scT && (b.author || '').toLowerCase().trim() === scA;
-            });
-            if (dupes.length > 0) {
-                var eds = dupes.map(function(b) {
-                    var p = [];
-                    if (b.format) p.push(b.format);
-                    var pl = (b.platforms || '').split(',').map(function(x){return x.trim();}).filter(Boolean);
-                    if (pl.length) p.push(pl.join(', '));
-                    return p.join(' \u00B7 ') || 'Unknown format';
-                });
-                dupeW.innerHTML = '\u26A0\uFE0F You already have this book:<br>' +
-                    eds.map(function(e){return '<span style="margin-left:0.5rem;">\u2022 ' + e + '</span>';}).join('<br>') +
-                    '<br><span style="font-size:0.75rem;color:#b45309;">You can still add it if this is a different edition.</span>';
-                dupeW.style.display = 'block';
-            } else {
-                dupeW.innerHTML = '\u2705 New book \u2014 not in your library yet';
-                dupeW.style.display = 'block';
-                dupeW.style.background = '#f0fdf4';
-                dupeW.style.borderColor = '#bbf7d0';
-                dupeW.style.color = '#166534';
-            }
-        }
-
-        function showScanError(isbn, message) {
-            document.getElementById('scanStatus').textContent = 'ISBN: ' + isbn;
-            document.getElementById('scanError').style.display = 'block';
-            document.getElementById('scanError').textContent = message;
-            document.getElementById('scanResult').style.display = 'none';
-            document.getElementById('scanAddBtn').style.display = 'none';
-            isLookingUp = false;
-        }
-
-        function retryScan() {
-            document.getElementById('scanError').style.display = 'none';
-            document.getElementById('scanResult').style.display = 'none';
-            document.getElementById('scanAddBtn').style.display = 'none';
-            isLookingUp = false;
-            startScanner();
-        }
-
-        function addScannedBook() {
-            if (!scannedBookData) return;
-            try { stopScanner(); } catch(e) {}
-
-            // Save data locally
-            var bookData = Object.assign({}, scannedBookData);
-
-            // Close scan modal
-            document.getElementById('scanModal').classList.remove('open');
-
-            // Open add book modal directly (no setTimeout)
-            document.getElementById('addBookModal').classList.add('open');
-
-            // Fill fields synchronously
-            document.getElementById('addBookTitle').value = bookData.title || '';
-            document.getElementById('addBookAuthor').value = bookData.author || '';
-            document.getElementById('addBookPages').value = bookData.pages || '';
-            document.getElementById('addBookYear').value = bookData.year || '';
-            document.getElementById('addBookFormat').value = bookData.format || '';
-            document.getElementById('addBookOwnership').value = 'Owned';
-            document.getElementById('addBookStatus').value = 'read';
-            if (bookData.tag) {
-                document.getElementById('addBookTag').value = bookData.tag;
-            }
-            var physicalCheck = document.querySelector('#addBookPlatforms input[value="Physical"]');
-            if (physicalCheck) physicalCheck.checked = true;
-
-            // Red highlights on missing required fields
-            var checks = [
-                { id: 'addBookTitle', val: bookData.title },
-                { id: 'addBookAuthor', val: bookData.author },
-                { id: 'addBookPages', val: bookData.pages },
-                { id: 'addBookYear', val: bookData.year },
-                { id: 'addBookTag', val: bookData.tag }
-            ];
-            for (var i = 0; i < checks.length; i++) {
-                var el = document.getElementById(checks[i].id);
-                var lbl = el ? (el.closest('.form-group') ? el.closest('.form-group').querySelector('label') : null) : null;
-                if (!checks[i].val) {
-                    if (el) el.classList.add('scan-missing');
-                    if (lbl) lbl.classList.add('scan-missing-label');
-                } else {
-                    if (el) el.classList.remove('scan-missing');
-                    if (lbl) lbl.classList.remove('scan-missing-label');
-                }
-            }
-            // Clear red on edit
-            document.querySelectorAll('.scan-missing').forEach(function(el) {
-                var handler = function() {
-                    el.classList.remove('scan-missing');
-                    var grp = el.closest('.form-group');
-                    if (grp) { var l = grp.querySelector('label'); if (l) l.classList.remove('scan-missing-label'); }
-                };
-                el.addEventListener('input', handler, { once: true });
-                el.addEventListener('change', handler, { once: true });
-            });
-        }
     </script>
 
     <!-- ADD BOOK MODAL -->
@@ -2710,31 +2382,6 @@
                     <button type="submit" class="btn-save">Add Book</button>
                 </div>
             </form>
-        </div>
-    </div>
-    
-    <!-- ISBN SCANNER MODAL -->
-    <div class="modal-overlay" id="scanModal" onclick="if(event.target===this)closeScanModal()">
-        <div class="modal" style="max-width:400px;">
-            <h2>📷 Scan ISBN Barcode</h2>
-            <div id="scanReader" style="width:100%;border-radius:8px;overflow:hidden;"></div>
-            <div id="scanStatus" style="text-align:center;padding:0.5rem;color:var(--gray-500);font-size:0.85rem;">Point your camera at an ISBN barcode</div>
-            <div id="scanError" style="display:none;padding:0.6rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-top:0.5rem;color:#991b1b;font-size:0.85rem;text-align:center;"></div>
-            <div id="scanResult" style="display:none;padding:0.75rem;background:var(--accent-light);border-radius:8px;margin-top:0.5rem;">
-                <div style="font-weight:600;color:var(--primary);margin-bottom:0.25rem;" id="scanBookTitle"></div>
-                <div style="font-size:0.85rem;color:var(--gray-500);" id="scanBookInfo"></div>
-                <div id="scanDupeWarning" style="display:none;margin-top:0.5rem;padding:0.5rem;background:#fefce8;border:1px solid #fde68a;border-radius:6px;font-size:0.8rem;color:#92400e;"></div>
-                
-            </div>
-            <div style="margin-top:0.75rem;display:flex;gap:0.4rem;align-items:center;">
-                <input type="text" id="manualIsbn" placeholder="Or type ISBN here..." style="flex:1;padding:0.4rem 0.6rem;border:1px solid var(--gray-300);border-radius:6px;font-size:0.85rem;font-family:inherit;">
-                <button type="button" onclick="manualLookup()" style="padding:0.4rem 0.75rem;background:var(--accent);color:white;border:none;border-radius:6px;font-size:0.85rem;cursor:pointer;">Look up</button>
-            </div>
-            <div class="modal-actions" style="margin-top:0.5rem;">
-                <button type="button" class="btn-cancel" onclick="closeScanModal()">Cancel</button>
-                <button type="button" class="btn-cancel" onclick="retryScan()">Scan again</button>
-                <button type="button" class="btn-save" id="scanAddBtn" style="display:none;" onclick="addScannedBook()">Add This Book</button>
-            </div>
         </div>
     </div>
     <div class="modal-overlay" id="editBookModal" onclick="if(event.target===this)closeEditBookModal()">
