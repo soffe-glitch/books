@@ -1896,6 +1896,7 @@
             const totalDays = 365 + (currentYear % 4 === 0 ? 1 : 0);
             const pacePerMonth = booksReadThisYear > 0 ? (booksReadThisYear / daysElapsed * 30.44).toFixed(1) : 0;
             const projectedTotal = booksReadThisYear > 0 ? Math.round(booksReadThisYear / daysElapsed * totalDays) : 0;
+            const projectedPages = pagesReadThisYear > 0 ? Math.round(pagesReadThisYear / daysElapsed * totalDays) : 0;
 
             const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             const monthlyCounts = new Array(12).fill(0);
@@ -1909,6 +1910,7 @@
             trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--accent)">' + pacePerMonth + '</div><div class="pace-label">per month</div></div>';
             trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--gray-400)">' + projectedTotal + '</div><div class="pace-label">projected EOY</div></div>';
             trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--primary)">' + (pagesReadThisYear > 0 ? pagesReadThisYear.toLocaleString() : '—') + '</div><div class="pace-label">pages read</div></div>';
+            trackerHtml += '<div class="pace-stat"><div class="pace-num" style="color:var(--gray-400)">' + (projectedPages > 0 ? projectedPages.toLocaleString() : '—') + '</div><div class="pace-label">pages projected</div></div>';
             trackerHtml += '</div>';
 
             // Progress bar
