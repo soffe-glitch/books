@@ -790,6 +790,127 @@
         .journey-scale { display: flex; align-items: center; gap: 4px; margin-top: 0.75rem; justify-content: flex-end; font-size: 0.7rem; color: var(--gray-400); }
         .journey-scale-cell { width: 14px; height: 14px; border-radius: 3px; }
 
+        /* === Wrapped 2026 panel === */
+        .wrapped-panel { border-top: 4px solid var(--accent); }
+        .wrapped-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 0.75rem;
+        }
+        .wrapped-cell {
+            background: linear-gradient(135deg, var(--accent-light) 0%, var(--white) 100%);
+            border-radius: 10px;
+            padding: 1rem;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-height: 90px;
+        }
+        .wrapped-cell .w-label {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+        .wrapped-cell .w-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            color: var(--primary);
+            font-weight: 700;
+            line-height: 1.25;
+            word-break: break-word;
+        }
+        .wrapped-cell .w-sub {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: auto;
+        }
+
+        /* === Universes list === */
+        .universe-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .universe-item:last-child { border-bottom: none; }
+        .universe-rank {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            color: var(--gray-300);
+            width: 32px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .universe-info { flex: 1; min-width: 0; }
+        .universe-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 0.95rem;
+        }
+        .universe-meta {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 2px;
+        }
+        .universe-hours {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--primary);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .universe-hours-unit {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            margin-left: 2px;
+        }
+
+        /* === Dramione corner === */
+        .dramione-panel { border-top: 4px solid var(--badge-pink); }
+        .dramione-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .dramione-cell {
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+            background: rgba(236, 72, 153, 0.06);
+            border-radius: 8px;
+        }
+        .dramione-cell .d-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .dramione-cell .d-label {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 0.25rem;
+        }
+        .dramione-highlight {
+            background: rgba(236, 72, 153, 0.08);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            margin-top: 0.5rem;
+            border-left: 3px solid var(--badge-pink);
+        }
+        .dramione-highlight strong {
+            color: var(--gray-900);
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
             .stats-two-col { grid-template-columns: 1fr; }
             .stats-totals { gap: 0.5rem; }
@@ -1288,6 +1409,24 @@
             <div class="stats-panel">
                 <h3>Reading Journey</h3>
                 <div id="readingJourney"></div>
+            </div>
+
+            <!-- Reading Wrapped -->
+            <div class="stats-panel wrapped-panel">
+                <h3 id="wrappedTitle">2026 Wrapped</h3>
+                <div id="wrapped2026" class="wrapped-grid"></div>
+            </div>
+
+            <!-- Hours in Fictional Universes -->
+            <div class="stats-panel">
+                <h3>Hours in Fictional Universes</h3>
+                <div id="universeHours"></div>
+            </div>
+
+            <!-- Dramione Corner -->
+            <div class="stats-panel dramione-panel">
+                <h3>Dramione Corner</h3>
+                <div id="dramioneStats"></div>
             </div>
 
             <!-- Recently Read (full width) -->
@@ -2062,6 +2201,137 @@
                 speedHtml = '<div style="color:var(--gray-400); font-size:0.85rem;">Add start dates to your books to see reading speed stats.</div>';
             }
             document.getElementById('readingSpeed').innerHTML = speedHtml;
+
+            // ============ UNIVERSES / WRAPPED / DRAMIONE ============
+            const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            const effectiveWords = b => b.word_count || ((b.pages || 0) * 250);
+            const hoursOf = b => effectiveWords(b) / 15000;  // 250 wpm * 60 min
+            const fmtHours = h => {
+                if (!h || h <= 0) return '0h';
+                const hh = Math.floor(h);
+                const mm = Math.round((h - hh) * 60);
+                if (hh >= 100) return hh.toLocaleString() + 'h';
+                return hh + 'h ' + mm + 'm';
+            };
+            const clipTitle = t => {
+                t = (t || '').replace(/</g, '&lt;');
+                return t.length > 45 ? t.slice(0, 43) + '…' : t;
+            };
+
+            // Universe mapping — merges specific series into universes
+            const getUniverse = b => {
+                if (b.tag === 'Dramione') return 'Wizarding World';
+                const m = (b.title || '').match(/\(([^()]+?),\s*#[\d.]+\)/);
+                if (m) {
+                    const s = m[1].trim();
+                    if (['Mistborn','The Stormlight Archive','Stormlight Archive','Warbreaker','Elantris','The Reckoners','Skyward'].includes(s)) return 'Cosmere';
+                    if (s === 'Harry Potter' || s === 'Harry Potter Novels') return 'Wizarding World';
+                    return s;
+                }
+                return null;
+            };
+
+            // ---- Hours in Fictional Universes ----
+            const universeMap = {};
+            readBooks.forEach(b => {
+                const u = getUniverse(b);
+                if (!u) return;
+                if (!universeMap[u]) universeMap[u] = { name: u, books: 0, words: 0, hours: 0 };
+                universeMap[u].books++;
+                universeMap[u].words += effectiveWords(b);
+                universeMap[u].hours += hoursOf(b);
+            });
+            const topUniverses = Object.values(universeMap).sort((a, b) => b.hours - a.hours).slice(0, 5);
+            let uHtml = '';
+            if (topUniverses.length === 0) {
+                uHtml = '<div style="color:var(--gray-400); font-size:0.85rem;">No universe data yet — add series info in titles or a Dramione tag.</div>';
+            } else {
+                topUniverses.forEach((u, i) => {
+                    uHtml += '<div class="universe-item">';
+                    uHtml += '<div class="universe-rank">#' + (i + 1) + '</div>';
+                    uHtml += '<div class="universe-info">';
+                    uHtml += '<div class="universe-name">' + u.name.replace(/</g, '&lt;') + '</div>';
+                    uHtml += '<div class="universe-meta">' + u.books + ' book' + (u.books !== 1 ? 's' : '') + ' · ' + u.words.toLocaleString() + ' words</div>';
+                    uHtml += '</div>';
+                    uHtml += '<div class="universe-hours">' + fmtHours(u.hours) + '</div>';
+                    uHtml += '</div>';
+                });
+            }
+            document.getElementById('universeHours').innerHTML = uHtml;
+
+            // ---- Reading Wrapped (current year) ----
+            document.getElementById('wrappedTitle').textContent = currentYear + ' Wrapped';
+            let wHtml = '';
+            if (booksThisYear.length === 0) {
+                wHtml = '<div style="color:var(--gray-400); font-size:0.85rem;">No books read in ' + currentYear + ' yet — come back after a few reads!</div>';
+            } else {
+                const yearTagCount = {};
+                booksThisYear.forEach(b => { if (b.tag) yearTagCount[b.tag] = (yearTagCount[b.tag] || 0) + 1; });
+                const topTag = Object.entries(yearTagCount).sort((a, b) => b[1] - a[1])[0];
+
+                const yearAuthorCount = {};
+                booksThisYear.forEach(b => { if (b.author) yearAuthorCount[b.author] = (yearAuthorCount[b.author] || 0) + 1; });
+                const topAuth = Object.entries(yearAuthorCount).sort((a, b) => b[1] - a[1])[0];
+
+                const longest = booksThisYear.filter(b => effectiveWords(b) > 0).sort((a, b) => effectiveWords(b) - effectiveWords(a))[0];
+
+                const ratedThisYear = booksThisYear.filter(b => b.my_rating > 0);
+                const highest = ratedThisYear.length > 0 ? ratedThisYear.slice().sort((a, b) => b.my_rating - a.my_rating || effectiveWords(b) - effectiveWords(a))[0] : null;
+
+                const monthCountsW = new Array(12).fill(0);
+                booksThisYear.forEach(b => {
+                    const parts = (b.date_read || '').split('/');
+                    if (parts.length >= 2) monthCountsW[parseInt(parts[1]) - 1]++;
+                });
+                const bestMonthIdx = monthCountsW.indexOf(Math.max(...monthCountsW));
+
+                const hoursYear = booksThisYear.reduce((s, b) => s + hoursOf(b), 0);
+                const wordsYear = booksThisYear.reduce((s, b) => s + effectiveWords(b), 0);
+                const avgR = ratedThisYear.length > 0 ? (ratedThisYear.reduce((s, b) => s + b.my_rating, 0) / ratedThisYear.length).toFixed(2) : '—';
+
+                const cell = (label, value, sub) => '<div class="wrapped-cell"><div class="w-label">' + label + '</div><div class="w-value">' + value + '</div>' + (sub ? '<div class="w-sub">' + sub + '</div>' : '') + '</div>';
+
+                wHtml += cell('Books Read', booksThisYear.length, '');
+                wHtml += cell('Top Genre', (topTag ? topTag[0] : '—'), (topTag ? topTag[1] + ' books' : ''));
+                wHtml += cell('Top Author', (topAuth ? clipTitle(topAuth[0]) : '—'), (topAuth ? topAuth[1] + ' books' : ''));
+                wHtml += cell('Total Hours', fmtHours(hoursYear), wordsYear.toLocaleString() + ' words');
+                wHtml += cell('Longest Book', longest ? clipTitle(longest.title) : '—', longest ? effectiveWords(longest).toLocaleString() + ' words' : '');
+                wHtml += cell('Best Month', (bestMonthIdx >= 0 && monthCountsW[bestMonthIdx] > 0) ? MONTH_NAMES[bestMonthIdx] : '—', (bestMonthIdx >= 0 && monthCountsW[bestMonthIdx] > 0) ? monthCountsW[bestMonthIdx] + ' books' : '');
+                wHtml += cell('Highest Rated', highest ? clipTitle(highest.title) : '—', highest ? '★ ' + highest.my_rating : '');
+                wHtml += cell('Avg Rating Given', avgR, ratedThisYear.length + ' rated');
+            }
+            document.getElementById('wrapped2026').innerHTML = wHtml;
+
+            // ---- Dramione Corner ----
+            const dramione = books.filter(b => b.tag === 'Dramione' && b.status === 'read');
+            const dramioneThisYear = dramione.filter(b => (b.date_read || '').startsWith(String(currentYear)));
+            let dHtml = '';
+            if (dramione.length === 0) {
+                dHtml = '<div style="color:var(--gray-400); font-size:0.85rem;">No Dramione reads yet — tag a book with "Dramione" to populate this.</div>';
+            } else {
+                const dramioneWords = dramione.reduce((s, b) => s + effectiveWords(b), 0);
+                const dramioneHours = dramione.reduce((s, b) => s + hoursOf(b), 0);
+                const dramioneRated = dramione.filter(b => b.my_rating > 0);
+                const dramioneAvg = dramioneRated.length > 0 ? (dramioneRated.reduce((s, b) => s + b.my_rating, 0) / dramioneRated.length).toFixed(2) : '—';
+                const longestDramione = dramione.filter(b => effectiveWords(b) > 0).sort((a, b) => effectiveWords(b) - effectiveWords(a))[0];
+                const topDramione = dramioneRated.length > 0 ? dramioneRated.slice().sort((a, b) => b.my_rating - a.my_rating || effectiveWords(b) - effectiveWords(a))[0] : null;
+
+                dHtml += '<div class="dramione-grid">';
+                dHtml += '<div class="dramione-cell"><div class="d-value">' + dramioneThisYear.length + '</div><div class="d-label">' + currentYear + '</div></div>';
+                dHtml += '<div class="dramione-cell"><div class="d-value">' + dramione.length + '</div><div class="d-label">All Time</div></div>';
+                dHtml += '<div class="dramione-cell"><div class="d-value">' + fmtHours(dramioneHours) + '</div><div class="d-label">Total Hours</div></div>';
+                dHtml += '<div class="dramione-cell"><div class="d-value">' + dramioneWords.toLocaleString() + '</div><div class="d-label">Total Words</div></div>';
+                dHtml += '<div class="dramione-cell"><div class="d-value">' + dramioneAvg + '</div><div class="d-label">Avg Rating</div></div>';
+                dHtml += '</div>';
+
+                if (topDramione) {
+                    dHtml += '<div class="dramione-highlight">Top pick: <strong>' + clipTitle(topDramione.title) + '</strong> — ★ ' + topDramione.my_rating + (topDramione.author ? ' · ' + topDramione.author.replace(/</g,'&lt;') : '') + '</div>';
+                }
+                if (longestDramione) {
+                    dHtml += '<div class="dramione-highlight">Longest fic: <strong>' + clipTitle(longestDramione.title) + '</strong> — ' + effectiveWords(longestDramione).toLocaleString() + ' words · ' + fmtHours(hoursOf(longestDramione)) + '</div>';
+                }
+            }
+            document.getElementById('dramioneStats').innerHTML = dHtml;
         }
 
         // ============ EDIT BOOK MODAL ============
