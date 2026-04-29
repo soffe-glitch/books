@@ -563,7 +563,7 @@
             background: var(--white);
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
+            overflow: visible;
         }
 
         .books-table {
@@ -770,6 +770,7 @@
             margin-top: 0.5rem;
         }
 
+        .journey-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .journey-grid { display: flex; flex-direction: column; gap: 3px; }
         .journey-row { display: flex; align-items: center; gap: 0; }
         .journey-month-label { width: 32px; font-weight: 500; font-size: 0.72rem; color: var(--gray-500); text-align: right; padding-right: 6px; flex-shrink: 0; }
@@ -913,11 +914,29 @@
 
         @media (max-width: 768px) {
             .stats-two-col { grid-template-columns: 1fr; }
+            .stats-hero { padding: 1.25rem; }
+            .stats-panel { padding: 1rem; }
             .stats-totals { gap: 0.5rem; }
             .stats-totals .stat-card { min-width: 90px; padding: 0.75rem; }
             .stats-totals .stat-card .value { font-size: 1.25rem; }
-            .pace-numbers { gap: 1.5rem; }
-            .pace-num { font-size: 2rem; }
+
+            /* 2026 Reading Pace: switch from flex row to wrapped grid so 5 stats fit */
+            .pace-numbers {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.75rem 0.5rem;
+                margin-bottom: 1rem;
+            }
+            .pace-num { font-size: 1.5rem; }
+            .pace-label { font-size: 0.65rem; letter-spacing: 0.02em; }
+            .pace-stat { min-width: 0; }
+
+            /* Reading Journey heatmap: scroll handled by .journey-scroll wrapper */
+            .journey-year-headers { padding-left: 32px; }
+            .journey-cell { width: 24px; height: 18px; min-width: 24px; }
+            .journey-year-header { width: 27px; min-width: 27px; font-size: 0.6rem; }
+            .journey-month-label { width: 28px; font-size: 0.65rem; padding-right: 4px; }
+            .journey-row { width: max-content; }
         }
 
         /* === TAB 4: BULK EDIT === */
@@ -1141,18 +1160,18 @@
             .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
             .charts-section { grid-template-columns: 1fr; }
 
-            /* Books table: horizontal scroll */
+            /* Books table: horizontal scroll on mobile (sticky thead disabled here, but page is shorter) */
+            .books-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             .books-table, .recently-read-table { font-size: 0.8rem; }
             .books-table th, .books-table td,
-            .recently-read-table th, .recently-read-table td { padding: 0.4rem; }
+            .recently-read-table th, .recently-read-table td { padding: 0.4rem; white-space: nowrap; }
 
             .filter-buttons { gap: 0.25rem; }
             .filter-button { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
 
-            /* Reading Journey heatmap: scroll horizontally if many years */
-            .journey-year-headers, .journey-row { overflow-x: auto; }
-            .journey-cell { width: 28px; height: 20px; min-width: 28px; }
-            .journey-year-header { width: 31px; min-width: 31px; font-size: 0.65rem; }
+            /* Reading Journey heatmap: smaller cells on mobile (scroll handled in earlier media block) */
+            .journey-cell { width: 24px; height: 18px; min-width: 24px; }
+            .journey-year-header { width: 27px; min-width: 27px; font-size: 0.6rem; }
 
             /* Reading Speed */
             .speed-big .speed-value { font-size: 1.75rem; }
@@ -1353,7 +1372,7 @@
                     </div>
                 </div>
             </div>
-            <div class="books-table-wrapper" style="overflow:visible;">
+            <div class="books-table-wrapper">
                 <table class="books-table">
                     <thead>
                         <tr>
@@ -2136,6 +2155,8 @@
             const sortedYears = Object.keys(byYear).sort((a, b) => parseInt(a) - parseInt(b));
 
             let journeyHtml = '';
+            // Outer scroll wrapper so year headers + month rows scroll together on mobile
+            journeyHtml += '<div class="journey-scroll">';
             // Year headers across the top
             journeyHtml += '<div class="journey-year-headers">';
             sortedYears.forEach(yr => { journeyHtml += '<div class="journey-year-header">' + yr + '</div>'; });
@@ -2166,6 +2187,7 @@
                 journeyHtml += '</div></div>';
             }
             journeyHtml += '</div>';
+            journeyHtml += '</div>'; // close .journey-scroll
 
             // Scale legend
             journeyHtml += '<div class="journey-scale">';
