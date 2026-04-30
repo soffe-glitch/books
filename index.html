@@ -1160,11 +1160,32 @@
             .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
             .charts-section { grid-template-columns: 1fr; }
 
-            /* Books table: horizontal scroll on mobile (sticky thead disabled here, but page is shorter) */
-            .books-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            /* Books / Recently Read tables: horizontal scroll on mobile */
+            .books-table-wrapper,
+            .recently-read-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                /* visible scrollbar hint so user knows table is scrollable */
+                scrollbar-width: thin;
+            }
+            .books-table-wrapper::-webkit-scrollbar,
+            .recently-read-wrapper::-webkit-scrollbar {
+                height: 6px;
+                -webkit-appearance: none;
+            }
+            .books-table-wrapper::-webkit-scrollbar-thumb,
+            .recently-read-wrapper::-webkit-scrollbar-thumb {
+                background: var(--accent);
+                border-radius: 3px;
+            }
             .books-table, .recently-read-table { font-size: 0.8rem; }
             .books-table th, .books-table td,
             .recently-read-table th, .recently-read-table td { padding: 0.4rem; white-space: nowrap; }
+            /* Sticky thead doesn't play well with horizontal-scroll wrapper on mobile */
+            .books-table thead { position: static; }
+
+            /* Stats panels: prevent any child from bleeding past the rounded card */
+            .stats-panel { overflow: hidden; }
 
             .filter-buttons { gap: 0.25rem; }
             .filter-button { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
@@ -1451,17 +1472,19 @@
             <!-- Recently Read (full width) -->
             <div class="stats-panel">
                 <h3>Recently Read</h3>
-                <table class="recently-read-table" id="recentlyReadTable">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Author</th>
-                            <th>Rating</th>
-                            <th>Date Read</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentlyReadBody"></tbody>
-                </table>
+                <div class="recently-read-wrapper">
+                    <table class="recently-read-table" id="recentlyReadTable">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Rating</th>
+                                <th>Date Read</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentlyReadBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
