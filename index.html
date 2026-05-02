@@ -1295,6 +1295,11 @@
             transition: all 0.2s;
         }
         .header-btn:hover { background: rgba(255,255,255,0.25); }
+        .header-btn-dramione {
+            background: rgba(236, 72, 153, 0.25);
+            border-color: rgba(236, 72, 153, 0.6);
+        }
+        .header-btn-dramione:hover { background: rgba(236, 72, 153, 0.4); }
 
         /* Platform checkboxes in modal */
         .platform-checks { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -1334,7 +1339,7 @@
         <p>Track your reading journey across all platforms</p>
         <div class="header-actions">
             <button class="header-btn" onclick="openAddBookModal()">+ Add Book</button>
-
+            <button class="header-btn header-btn-dramione" onclick="openAddDramioneModal()">+ Add Dramione</button>
         </div>
     </div>
 
@@ -2521,14 +2526,59 @@
         }
 
         // ============ ADD BOOK MODAL ============
-        function openAddBookModal() {
-            document.getElementById('addBookModal').classList.add('open');
+        // Dynamic word-count -> pages estimate (250 words/page).
+        // Updates pages every keystroke UNLESS user has manually edited the pages field.
+        function autoFillPages(wordsId, pagesId) {
+            const wordsEl = document.getElementById(wordsId);
+            const pagesEl = document.getElementById(pagesId);
+            if (pagesEl.dataset.manual === '1') return;
+            const words = parseInt(wordsEl.value) || 0;
+            pagesEl.value = words > 0 ? Math.ceil(words / 250) : '';
+        }
+
+        function openAddBookModal(preset) {
+            const modal = document.getElementById('addBookModal');
+            const form = document.getElementById('addBookForm');
+            form.reset();
+            // Clear manual flag on pages so auto-calc works again
+            document.getElementById('addBookPages').dataset.manual = '';
+            // Uncheck all platform boxes
+            document.querySelectorAll('#addBookPlatforms input[type="checkbox"]').forEach(cb => cb.checked = false);
+            // Apply optional presets
+            if (preset && typeof preset === 'object') {
+                if (preset.format) document.getElementById('addBookFormat').value = preset.format;
+                if (preset.ownership) document.getElementById('addBookOwnership').value = preset.ownership;
+                if (preset.tag) document.getElementById('addBookTag').value = preset.tag;
+                if (preset.status) document.getElementById('addBookStatus').value = preset.status;
+                if (Array.isArray(preset.platforms)) {
+                    preset.platforms.forEach(name => {
+                        const cb = document.querySelector('#addBookPlatforms input[value="' + name + '"]');
+                        if (cb) cb.checked = true;
+                    });
+                }
+                if (preset.title) document.querySelector('#addBookModal h2').textContent = preset.title;
+                else document.querySelector('#addBookModal h2').textContent = 'Add New Book';
+            } else {
+                document.querySelector('#addBookModal h2').textContent = 'Add New Book';
+            }
+            modal.classList.add('open');
             document.getElementById('addBookTitle').focus();
+        }
+
+        function openAddDramioneModal() {
+            openAddBookModal({
+                title: 'Add Dramione Book',
+                format: 'ebook',
+                ownership: 'Owned',
+                platforms: ['Apple Books'],
+                tag: 'Dramione'
+            });
         }
 
         function closeAddBookModal() {
             document.getElementById('addBookModal').classList.remove('open');
             document.getElementById('addBookForm').reset();
+            document.getElementById('addBookPages').dataset.manual = '';
         }
 
         async function saveNewBook() {
@@ -2553,7 +2603,7 @@
                 date_read: document.getElementById('addBookDateRead').value.replace(/-/g, '/') || '',
                 date_added: today,
                 year_published: parseInt(document.getElementById('addBookYear').value) || 0,
-                status: document.getElementById('addBookStatus').value || 'read',
+                status: document.getElementById('addBookStatus').value || 'to-read',
                 tag: document.getElementById('addBookTag').value || null,
                 publisher: '',
                 word_count: parseInt(document.getElementById('addBookWordCount').value) || 0
@@ -2598,13 +2648,9 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group" style="grid-column:1/-1">
                         <label>Author *</label>
                         <input type="text" id="addBookAuthor" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Pages</label>
-                        <input type="number" id="addBookPages" min="0">
                     </div>
                 </div>
                 <div class="form-row">
@@ -2654,9 +2700,9 @@
                     <div class="form-group">
                         <label>Status</label>
                         <select id="addBookStatus">
-                            <option value="read">Read</option>
-                            <option value="currently-reading">Currently reading</option>
                             <option value="to-read">To be read (TBR)</option>
+                            <option value="currently-reading">Currently reading</option>
+                            <option value="read">Read</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -2688,10 +2734,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Word Count</label>
-                        <input type="number" id="addBookWordCount" min="0" oninput="if(this.value > 0 && !document.getElementById('addBookPages').value) document.getElementById('addBookPages').value = Math.ceil(this.value / 250)">
+                        <input type="number" id="addBookWordCount" min="0" oninput="autoFillPages('addBookWordCount','addBookPages')">
                     </div>
                     <div class="form-group">
-                        <label style="color:var(--gray-400); font-size:0.85rem;">Pages auto-fills from word count if empty</label>
+                        <label>Pages <span style="color:var(--gray-400); font-weight:400;">(auto from words)</span></label>
+                        <input type="number" id="addBookPages" min="0" oninput="this.dataset.manual='1'">
                     </div>
                 </div>
                 <div class="modal-actions">
