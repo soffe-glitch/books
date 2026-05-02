@@ -373,6 +373,68 @@
             margin-bottom: 1rem;
         }
 
+        .tbr-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .tbr-filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .tbr-filter-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+        .tbr-segmented {
+            display: inline-flex;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--gray-50);
+        }
+        .tbr-seg {
+            padding: 0.45rem 0.85rem;
+            border: none;
+            background: transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            border-right: 1px solid var(--gray-300);
+        }
+        .tbr-seg:last-child { border-right: none; }
+        .tbr-seg:hover { background: var(--accent-light); }
+        .tbr-seg.active {
+            background: var(--accent);
+            color: var(--white);
+        }
+        .tbr-seg-dramione.active {
+            background: var(--badge-pink);
+        }
+        .btn-pick-random:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-pick-random:disabled:hover { background: var(--primary); transform: none; }
+
+        @media (max-width: 768px) {
+            .tbr-filters { gap: 0.75rem; padding: 0.75rem; }
+            .tbr-seg { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+        }
+
         .btn-pick-random {
             background: var(--primary);
             color: var(--white);
@@ -1714,22 +1776,81 @@
         }
 
         let tbrPickedBook = null;
+        const tbrPickerFilters = { tag: 'any', length: 'any' };
+
+        // Estimate pages: prefer pages field, else convert word_count (250 wpp), else 0
+        function effectivePages(b) {
+            if (b.pages && b.pages > 0) return b.pages;
+            if (b.word_count && b.word_count > 0) return Math.ceil(b.word_count / 250);
+            return 0;
+        }
+
+        function getFilteredTbrBooks() {
+            return books.filter(b => {
+                if (b.status !== 'to-read') return false;
+                if (tbrPickerFilters.tag === 'dramione' && b.tag !== 'Dramione') return false;
+                if (tbrPickerFilters.tag === 'non-dramione' && b.tag === 'Dramione') return false;
+                if (tbrPickerFilters.length !== 'any') {
+                    const pg = effectivePages(b);
+                    if (tbrPickerFilters.length === 'long' && pg <= 300) return false;
+                    if (tbrPickerFilters.length === 'short' && (pg === 0 || pg > 300)) return false;
+                }
+                return true;
+            });
+        }
+
+        function setTbrFilter(group, value) {
+            tbrPickerFilters[group] = value;
+            tbrPickedBook = null;
+            renderTbrPicker();
+        }
+
         function renderTbrPicker() {
             const tbrBooks = books.filter(b => b.status === 'to-read');
             let html = '<h3>What should I read next?</h3>';
             if (tbrBooks.length === 0) {
                 html += '<div class="cr-empty">Your TBR list is empty!</div>';
-            } else {
-                html += '<div class="tbr-picker-controls">';
-                html += '<button class="btn-pick-random" onclick="pickRandomTbr()">Pick a random book</button>';
-                html += '<span class="tbr-count">' + tbrBooks.length + ' books on TBR</span>';
-                html += '</div>';
-                html += '<div id="tbrPickResult">';
-                if (tbrPickedBook && tbrPickedBook.status === 'to-read') {
-                    html += renderTbrCard(tbrPickedBook);
-                }
-                html += '</div>';
+                document.getElementById('tbrPickerSection').innerHTML = html;
+                return;
             }
+
+            const filtered = getFilteredTbrBooks();
+            const f = tbrPickerFilters;
+
+            // Filter UI
+            html += '<div class="tbr-filters">';
+            html += '<div class="tbr-filter-group">';
+            html += '<span class="tbr-filter-label">Tag</span>';
+            html += '<div class="tbr-segmented">';
+            html += '<button class="tbr-seg' + (f.tag==='any'?' active':'') + '" onclick="setTbrFilter(\'tag\',\'any\')">Any</button>';
+            html += '<button class="tbr-seg tbr-seg-dramione' + (f.tag==='dramione'?' active':'') + '" onclick="setTbrFilter(\'tag\',\'dramione\')">Dramione</button>';
+            html += '<button class="tbr-seg' + (f.tag==='non-dramione'?' active':'') + '" onclick="setTbrFilter(\'tag\',\'non-dramione\')">Non-Dramione</button>';
+            html += '</div></div>';
+
+            html += '<div class="tbr-filter-group">';
+            html += '<span class="tbr-filter-label">Length</span>';
+            html += '<div class="tbr-segmented">';
+            html += '<button class="tbr-seg' + (f.length==='any'?' active':'') + '" onclick="setTbrFilter(\'length\',\'any\')">Any</button>';
+            html += '<button class="tbr-seg' + (f.length==='long'?' active':'') + '" onclick="setTbrFilter(\'length\',\'long\')">Long (&gt;300 pg)</button>';
+            html += '<button class="tbr-seg' + (f.length==='short'?' active':'') + '" onclick="setTbrFilter(\'length\',\'short\')">Short (&le;300 pg)</button>';
+            html += '</div></div>';
+            html += '</div>';
+
+            // Pick controls
+            html += '<div class="tbr-picker-controls">';
+            const disabled = filtered.length === 0 ? ' disabled' : '';
+            html += '<button class="btn-pick-random"' + disabled + ' onclick="pickRandomTbr()">Pick a random book</button>';
+            html += '<span class="tbr-count">' + filtered.length + ' of ' + tbrBooks.length + ' match</span>';
+            html += '</div>';
+
+            html += '<div id="tbrPickResult">';
+            if (tbrPickedBook && tbrPickedBook.status === 'to-read') {
+                html += renderTbrCard(tbrPickedBook);
+            } else if (filtered.length === 0) {
+                html += '<div class="cr-empty">No TBR books match these filters.</div>';
+            }
+            html += '</div>';
+
             document.getElementById('tbrPickerSection').innerHTML = html;
         }
 
@@ -1753,9 +1874,9 @@
         }
 
         function pickRandomTbr() {
-            const tbrBooks = books.filter(b => b.status === 'to-read');
-            if (tbrBooks.length === 0) return;
-            const pick = tbrBooks[Math.floor(Math.random() * tbrBooks.length)];
+            const filtered = getFilteredTbrBooks();
+            if (filtered.length === 0) return;
+            const pick = filtered[Math.floor(Math.random() * filtered.length)];
             tbrPickedBook = pick;
             const resultDiv = document.getElementById('tbrPickResult');
             resultDiv.innerHTML = renderTbrCard(pick);
