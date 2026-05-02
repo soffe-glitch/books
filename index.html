@@ -653,6 +653,26 @@
             background: var(--gray-50);
         }
 
+        /* Frozen Title column — stays in place when scrolling horizontally */
+        .books-table th:first-child,
+        .books-table td:first-child {
+            position: sticky;
+            left: 0;
+            background: var(--white);
+            z-index: 2;
+            /* subtle right shadow as visual divider between frozen col and rest */
+            box-shadow: 4px 0 6px -4px rgba(0,0,0,0.12);
+            max-width: 280px;
+            min-width: 140px;
+        }
+        .books-table thead th:first-child {
+            background: var(--gray-50);
+            z-index: 3;
+        }
+        .books-table tbody tr:hover td:first-child {
+            background: var(--gray-50);
+        }
+
         .books-table th {
             padding: 0.75rem;
             text-align: left;
@@ -1239,6 +1259,13 @@
             .books-table, .recently-read-table { font-size: 0.8rem; }
             .books-table th, .books-table td,
             .recently-read-table th, .recently-read-table td { padding: 0.4rem; white-space: nowrap; }
+            /* But allow Title in books table to wrap inside the frozen column */
+            .books-table th:first-child,
+            .books-table td:first-child {
+                white-space: normal;
+                max-width: 160px;
+                min-width: 110px;
+            }
 
             /* Stats panels: prevent any child from bleeding past the rounded card */
             .stats-panel { overflow: hidden; }
