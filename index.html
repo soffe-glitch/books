@@ -563,7 +563,23 @@
             background: var(--white);
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: visible;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .recently-read-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .books-table-wrapper, .recently-read-wrapper { scrollbar-width: thin; }
+        .books-table-wrapper::-webkit-scrollbar,
+        .recently-read-wrapper::-webkit-scrollbar {
+            height: 6px;
+            -webkit-appearance: none;
+        }
+        .books-table-wrapper::-webkit-scrollbar-thumb,
+        .recently-read-wrapper::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
         }
 
         .books-table {
@@ -572,10 +588,7 @@
         }
 
         .books-table thead {
-            position: sticky;
-            top: 56px;
             background: var(--gray-50);
-            z-index: 10;
         }
 
         .books-table th {
@@ -1160,29 +1173,10 @@
             .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
             .charts-section { grid-template-columns: 1fr; }
 
-            /* Books / Recently Read tables: horizontal scroll on mobile */
-            .books-table-wrapper,
-            .recently-read-wrapper {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                /* visible scrollbar hint so user knows table is scrollable */
-                scrollbar-width: thin;
-            }
-            .books-table-wrapper::-webkit-scrollbar,
-            .recently-read-wrapper::-webkit-scrollbar {
-                height: 6px;
-                -webkit-appearance: none;
-            }
-            .books-table-wrapper::-webkit-scrollbar-thumb,
-            .recently-read-wrapper::-webkit-scrollbar-thumb {
-                background: var(--accent);
-                border-radius: 3px;
-            }
+            /* Tables: smaller text + nowrap so columns stay readable; scroll comes from default wrapper */
             .books-table, .recently-read-table { font-size: 0.8rem; }
             .books-table th, .books-table td,
             .recently-read-table th, .recently-read-table td { padding: 0.4rem; white-space: nowrap; }
-            /* Sticky thead doesn't play well with horizontal-scroll wrapper on mobile */
-            .books-table thead { position: static; }
 
             /* Stats panels: prevent any child from bleeding past the rounded card */
             .stats-panel { overflow: hidden; }
