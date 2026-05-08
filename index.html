@@ -252,6 +252,108 @@
 
         .cr-card-actions {
             margin-top: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .cr-progress {
+            margin-top: 0.25rem;
+        }
+        .cr-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+        .cr-progress-bar {
+            background: var(--gray-100);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .cr-progress-fill {
+            background: var(--accent);
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .btn-session {
+            background: var(--white);
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-session:hover {
+            background: var(--accent);
+            color: var(--white);
+        }
+        .btn-session-active {
+            background: var(--accent);
+            color: var(--white);
+        }
+        .btn-session-active:hover {
+            background: var(--primary);
+        }
+        .session-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            display: inline-block;
+            animation: session-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes session-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .session-dialog {
+            min-width: 360px;
+        }
+        .session-progress-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin: 1rem 0 0.5rem;
+        }
+        .session-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .session-progress-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+        .session-progress-row input[type="number"] {
+            width: 60px;
+            padding: 0.4rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .session-progress-pct {
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+        .session-progress-hint {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
         }
 
         .btn-finished {
@@ -1659,6 +1761,64 @@
                 });
                 if (!resp.ok) throw new Error('Failed to delete book from Supabase');
                 return resp;
+            },
+
+            // ===== READING SESSIONS =====
+            async fetchSessions() {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/reading_sessions?select=*&order=started_at', {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY
+                    }
+                });
+                if (!resp.ok) throw new Error('Failed to load reading sessions');
+                return resp.json();
+            },
+
+            async startSession(bookId) {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/reading_sessions', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({ book_id: bookId, started_at: new Date().toISOString() })
+                });
+                if (!resp.ok) throw new Error('Failed to start session');
+                const rows = await resp.json();
+                return rows[0];
+            },
+
+            async endSession(sessionId, progressPercent) {
+                const body = { ended_at: new Date().toISOString() };
+                if (progressPercent !== null && progressPercent !== undefined) body.progress_percent = progressPercent;
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/reading_sessions?id=eq.' + sessionId, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(body)
+                });
+                if (!resp.ok) throw new Error('Failed to end session');
+                const rows = await resp.json();
+                return rows[0];
+            },
+
+            async deleteSession(sessionId) {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/reading_sessions?id=eq.' + sessionId, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY
+                    }
+                });
+                if (!resp.ok) throw new Error('Failed to delete session');
+                return resp;
             }
         };
 
@@ -1666,6 +1826,7 @@
         let currentPage = { overview: 1, books: 1 };
         let booksSort = { field: 'date_read', direction: 'desc' };
         let filteredBooks = [...books];
+        let sessions = []; // reading sessions
 
         // Initialize
         window.addEventListener('DOMContentLoaded', async () => {
@@ -1675,8 +1836,12 @@
             }
 
             try {
-                const fetchedBooks = await supabase.fetchBooks();
+                const [fetchedBooks, fetchedSessions] = await Promise.all([
+                    supabase.fetchBooks(),
+                    supabase.fetchSessions().catch(e => { console.warn('Sessions failed to load:', e); return []; })
+                ]);
                 books = fetchedBooks;
+                sessions = fetchedSessions;
                 filteredBooks = [...books];
                 // Restore overview HTML that was replaced by loading message
                 loadingDiv.innerHTML = `
@@ -1762,6 +1927,78 @@
         }
 
         // ============ TAB 1: OVERVIEW ============
+        function getActiveSession(bookId) {
+            return sessions.find(s => s.book_id === bookId && !s.ended_at) || null;
+        }
+
+        function getLatestProgress(bookId) {
+            const ended = sessions
+                .filter(s => s.book_id === bookId && s.ended_at && s.progress_percent !== null && s.progress_percent !== undefined)
+                .sort((a, b) => new Date(b.ended_at) - new Date(a.ended_at));
+            return ended.length > 0 ? Number(ended[0].progress_percent) : 0;
+        }
+
+        function getTotalSessionMs(bookId) {
+            return sessions
+                .filter(s => s.book_id === bookId && s.ended_at)
+                .reduce((sum, s) => sum + (new Date(s.ended_at) - new Date(s.started_at)), 0);
+        }
+
+        function fmtDuration(ms) {
+            const totalMin = Math.floor(ms / 60000);
+            const h = Math.floor(totalMin / 60);
+            const m = totalMin % 60;
+            if (h === 0) return m + 'm';
+            return h + 'h ' + m + 'm';
+        }
+
+        // Aggregate session stats: total hours, words/hour, pages/hour
+        // Words/pages computed from progress_percent deltas × book.word_count / book.pages
+        function computeSessionStats() {
+            const completed = sessions.filter(s => s.ended_at);
+            let totalMs = 0;
+            let totalWords = 0;
+            let totalPages = 0;
+            let totalSessionsWithProgress = 0;
+
+            // Group sessions per book and sort by started_at
+            const byBook = {};
+            completed.forEach(s => {
+                if (!byBook[s.book_id]) byBook[s.book_id] = [];
+                byBook[s.book_id].push(s);
+            });
+
+            for (const bookId in byBook) {
+                const bookSessions = byBook[bookId].sort((a, b) => new Date(a.started_at) - new Date(b.started_at));
+                const book = books.find(b => b.id === parseInt(bookId));
+                let prevProgress = 0;
+                bookSessions.forEach(s => {
+                    totalMs += new Date(s.ended_at) - new Date(s.started_at);
+                    if (s.progress_percent !== null && s.progress_percent !== undefined && book) {
+                        const delta = Math.max(0, Number(s.progress_percent) - prevProgress);
+                        if (delta > 0) {
+                            totalSessionsWithProgress++;
+                            if (book.word_count) totalWords += (delta / 100) * book.word_count;
+                            if (book.pages) totalPages += (delta / 100) * book.pages;
+                            else if (book.word_count) totalPages += (delta / 100) * Math.ceil(book.word_count / 250);
+                        }
+                        prevProgress = Number(s.progress_percent);
+                    }
+                });
+            }
+
+            const totalHours = totalMs / 3600000;
+            return {
+                totalMs,
+                totalHours,
+                sessionCount: completed.length,
+                wordsPerHour: totalHours > 0 ? totalWords / totalHours : 0,
+                pagesPerHour: totalHours > 0 ? totalPages / totalHours : 0,
+                totalWords,
+                totalPages
+            };
+        }
+
         function renderOverviewTab() {
             // Currently Reading section
             const crBooks = books.filter(b => b.status === 'currently-reading');
@@ -1780,13 +2017,45 @@
                         const days = Math.ceil((now - started) / (1000 * 60 * 60 * 24));
                         durationHtml = '<div class="cr-card-duration">Day ' + days + ' · started ' + b.date_started + '</div>';
                     }
+
+                    // Progress + sessions
+                    const progress = getLatestProgress(b.id);
+                    const totalMs = getTotalSessionMs(b.id);
+                    const active = getActiveSession(b.id);
+                    const progressBarHtml = `
+                        <div class="cr-progress">
+                            <div class="cr-progress-label">
+                                <span>Progress</span>
+                                <span>${progress.toFixed(0)}%</span>
+                            </div>
+                            <div class="cr-progress-bar"><div class="cr-progress-fill" style="width:${progress}%"></div></div>
+                        </div>
+                    `;
+                    const sessionStatsHtml = totalMs > 0
+                        ? `<div class="cr-card-meta">Total reading time: ${fmtDuration(totalMs)}</div>`
+                        : '';
+                    let sessionBtnHtml;
+                    if (active) {
+                        const elapsed = Date.now() - new Date(active.started_at).getTime();
+                        sessionBtnHtml = `
+                            <button class="btn-session btn-session-active" onclick="endSessionPrompt(${active.id}, ${b.id})">
+                                <span class="session-dot"></span> Stop session · ${fmtDuration(elapsed)}
+                            </button>
+                        `;
+                    } else {
+                        sessionBtnHtml = `<button class="btn-session" onclick="startSessionFor(${b.id})">▶ Start session</button>`;
+                    }
+
                     crHtml += `
-                        <div class="cr-card">
+                        <div class="cr-card" data-book-id="${b.id}">
                             <div class="cr-card-title">${b.title}</div>
                             <div class="cr-card-author">${b.author || 'Unknown author'}</div>
                             <div class="cr-card-meta">${details.join(' · ')}</div>
                             ${durationHtml}
+                            ${progressBarHtml}
+                            ${sessionStatsHtml}
                             <div class="cr-card-actions">
+                                ${sessionBtnHtml}
                                 <button class="btn-finished" onclick="markFinished(${b.id}, this)">&#10003; Finished</button>
                             </div>
                         </div>
@@ -1798,8 +2067,98 @@
             }
             document.getElementById('currentlyReadingSection').innerHTML = crHtml;
 
+            // Live tick for active sessions
+            startActiveSessionTicker();
+
             // TBR Picker section
             renderTbrPicker();
+        }
+
+        // ============ READING SESSIONS ============
+        let activeSessionTickerId = null;
+        function startActiveSessionTicker() {
+            if (activeSessionTickerId) clearInterval(activeSessionTickerId);
+            const hasActive = sessions.some(s => !s.ended_at);
+            if (!hasActive) return;
+            activeSessionTickerId = setInterval(() => {
+                document.querySelectorAll('.btn-session-active').forEach(btn => {
+                    const card = btn.closest('.cr-card');
+                    if (!card) return;
+                    const bookId = parseInt(card.dataset.bookId);
+                    const active = getActiveSession(bookId);
+                    if (!active) return;
+                    const elapsed = Date.now() - new Date(active.started_at).getTime();
+                    btn.innerHTML = '<span class="session-dot"></span> Stop session · ' + fmtDuration(elapsed);
+                });
+            }, 30000); // every 30s
+        }
+
+        async function startSessionFor(bookId) {
+            try {
+                const session = await supabase.startSession(bookId);
+                sessions.push(session);
+                showToast('Session started');
+                renderOverviewTab();
+            } catch (e) {
+                alert('Could not start session: ' + e.message);
+            }
+        }
+
+        function endSessionPrompt(sessionId, bookId) {
+            const book = books.find(b => b.id === bookId);
+            const lastProgress = getLatestProgress(bookId);
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+            const elapsedMs = Date.now() - new Date(session.started_at).getTime();
+
+            const existing = document.getElementById('sessionDialog');
+            if (existing) existing.remove();
+
+            const dialog = document.createElement('div');
+            dialog.id = 'sessionDialog';
+            dialog.className = 'rating-dialog-overlay';
+            dialog.innerHTML = `
+                <div class="rating-dialog session-dialog">
+                    <h3>End reading session</h3>
+                    <p class="rating-dialog-sub">"${book ? book.title : 'Book'}" · ${fmtDuration(elapsedMs)} read</p>
+                    <label class="session-progress-label">What % are you on now?</label>
+                    <div class="session-progress-row">
+                        <input type="range" id="sessionProgressSlider" min="0" max="100" step="1" value="${Math.max(lastProgress, 0)}" oninput="document.getElementById('sessionProgressInput').value = this.value">
+                        <input type="number" id="sessionProgressInput" min="0" max="100" step="1" value="${Math.max(lastProgress, 0)}" oninput="document.getElementById('sessionProgressSlider').value = this.value">
+                        <span class="session-progress-pct">%</span>
+                    </div>
+                    <div class="session-progress-hint">Last logged: ${lastProgress.toFixed(0)}%</div>
+                    <div class="rating-dialog-actions">
+                        <button class="btn-finished" onclick="submitSessionEnd(${sessionId}, ${bookId})">Save session</button>
+                        <button class="btn-pick-again" onclick="submitSessionEnd(${sessionId}, ${bookId}, true)">Save without %</button>
+                        <button class="btn-pick-again" onclick="document.getElementById('sessionDialog').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+        }
+
+        async function submitSessionEnd(sessionId, bookId, skipPercent = false) {
+            const dialog = document.getElementById('sessionDialog');
+            const btn = dialog ? dialog.querySelector('.btn-finished') : null;
+            if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+            let percent = null;
+            if (!skipPercent) {
+                const inp = document.getElementById('sessionProgressInput');
+                const v = inp ? parseFloat(inp.value) : NaN;
+                if (!isNaN(v)) percent = Math.max(0, Math.min(100, v));
+            }
+            try {
+                const updated = await supabase.endSession(sessionId, percent);
+                const idx = sessions.findIndex(s => s.id === sessionId);
+                if (idx >= 0) sessions[idx] = updated;
+                if (dialog) dialog.remove();
+                showToast('Session saved');
+                renderOverviewTab();
+            } catch (e) {
+                alert('Could not save session: ' + e.message);
+                if (btn) { btn.disabled = false; btn.textContent = 'Save session'; }
+            }
         }
 
         let tbrPickedBook = null;
@@ -1915,10 +2274,11 @@
             btn.textContent = 'Saving...';
             const today = new Date();
             const dateStarted = today.getFullYear() + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + String(today.getDate()).padStart(2, '0');
+            const startedAt = today.toISOString();
             try {
-                await supabase.updateBook(bookId, { status: 'currently-reading', date_started: dateStarted });
+                await supabase.updateBook(bookId, { status: 'currently-reading', date_started: dateStarted, started_at: startedAt });
                 const book = books.find(b => b.id === bookId);
-                if (book) { book.status = 'currently-reading'; book.date_started = dateStarted; }
+                if (book) { book.status = 'currently-reading'; book.date_started = dateStarted; book.started_at = startedAt; }
                 tbrPickedBook = null;
                 showToast('"' + (book ? book.title : 'Book') + '" — started reading!');
                 if (currentTab === 'overview') renderOverviewTab();
@@ -1976,7 +2336,7 @@
             btn.textContent = 'Saving...';
             const today = new Date();
             const dateRead = today.getFullYear() + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + String(today.getDate()).padStart(2, '0');
-            const updates = { status: 'read', date_read: dateRead };
+            const updates = { status: 'read', date_read: dateRead, finished_at: today.toISOString() };
             if (dialogRating > 0) updates.my_rating = dialogRating;
             try {
                 await supabase.updateBook(bookId, updates);
@@ -2203,6 +2563,9 @@
             const effectivePages = b => b.pages || (b.word_count > 0 ? Math.ceil(b.word_count / 250) : 0);
             const pagesReadThisYear = booksThisYear.reduce((sum, b) => sum + effectivePages(b), 0);
 
+            // Session-based reading stats
+            const sessionStats = computeSessionStats();
+
             document.getElementById('overviewStats').innerHTML = `
                 <div class="stat-card"><div class="label">Total Books</div><div class="value">${books.length}</div></div>
                 <div class="stat-card"><div class="label">Read in ${currentYear}</div><div class="value">${booksReadThisYear}</div></div>
@@ -2213,6 +2576,10 @@
                 <div class="stat-card"><div class="label">Unique Authors</div><div class="value">${uniqueAuthors}</div></div>
                 <div class="stat-card"><div class="label">5-Star Books</div><div class="value">${fiveStarBooks}</div></div>
                 <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
+                <div class="stat-card"><div class="label">Reading Time</div><div class="value">${sessionStats.totalHours > 0 ? sessionStats.totalHours.toFixed(1) + 'h' : '—'}</div></div>
+                <div class="stat-card"><div class="label">Words / Hour</div><div class="value">${sessionStats.wordsPerHour > 0 ? Math.round(sessionStats.wordsPerHour).toLocaleString() : '—'}</div></div>
+                <div class="stat-card"><div class="label">Pages / Hour</div><div class="value">${sessionStats.pagesPerHour > 0 ? sessionStats.pagesPerHour.toFixed(1) : '—'}</div></div>
+                <div class="stat-card"><div class="label">Sessions</div><div class="value">${sessionStats.sessionCount > 0 ? sessionStats.sessionCount : '—'}</div></div>
             `;
 
             // Year tracker — pace for current year
