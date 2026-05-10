@@ -791,15 +791,13 @@
         }
 
         .stats-totals {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 0.75rem;
             margin-bottom: 1.5rem;
         }
 
         .stats-totals .stat-card {
-            flex: 1;
-            min-width: 120px;
             padding: 1rem;
             border-top-width: 3px;
         }
@@ -2213,18 +2211,21 @@
             const effectivePages = b => b.pages || (b.word_count > 0 ? Math.ceil(b.word_count / 250) : 0);
             const pagesReadThisYear = booksThisYear.reduce((sum, b) => sum + effectivePages(b), 0);
 
-            // Reading-duration stats: based on (finished_at - started_at) per book
-            // Calendar duration in days — honest about what we measure (not "reading hours")
-            const readWithDuration = books.filter(b =>
-                b.status === 'read' && b.started_at && b.finished_at &&
-                new Date(b.finished_at) > new Date(b.started_at)
+            // Daily reading rate: based on this-year totals divided by days elapsed in year.
+            // Honest measure — includes non-reading days, so it's actual lived rate.
+            const wordsThisYear = booksThisYear.reduce((sum, b) => sum + (b.word_count || 0), 0);
+            const daysElapsedInYear = Math.max(1, Math.ceil((now - new Date(currentYear, 0, 1)) / 86400000));
+            const wordsPerDay = wordsThisYear > 0 ? Math.round(wordsThisYear / daysElapsedInYear) : 0;
+            const pagesPerDay = pagesReadThisYear > 0 ? Math.round(pagesReadThisYear / daysElapsedInYear) : 0;
+
+            // Avg book duration: based on books with both started_at and finished_at this year
+            const yearReadWithDuration = booksThisYear.filter(b =>
+                b.started_at && b.finished_at && new Date(b.finished_at) > new Date(b.started_at)
             );
-            const totalDurationMs = readWithDuration.reduce((s, b) =>
-                s + (new Date(b.finished_at) - new Date(b.started_at)), 0);
-            const totalReadDays = totalDurationMs / 86400000;
-            const avgDaysPerBook = readWithDuration.length > 0 ? (totalReadDays / readWithDuration.length) : 0;
-            const wordsInDuration = readWithDuration.reduce((s, b) => s + (b.word_count || 0), 0);
-            const wordsPerDay = totalReadDays > 0 ? Math.round(wordsInDuration / totalReadDays) : 0;
+            const avgDaysPerBook = yearReadWithDuration.length > 0
+                ? yearReadWithDuration.reduce((s, b) => s + (new Date(b.finished_at) - new Date(b.started_at)), 0)
+                  / 86400000 / yearReadWithDuration.length
+                : 0;
 
             document.getElementById('overviewStats').innerHTML = `
                 <div class="stat-card"><div class="label">Total Books</div><div class="value">${books.length}</div></div>
@@ -2237,6 +2238,7 @@
                 <div class="stat-card"><div class="label">5-Star Books</div><div class="value">${fiveStarBooks}</div></div>
                 <div class="stat-card"><div class="label">Total Words</div><div class="value">${totalWords > 0 ? totalWords.toLocaleString() : '—'}</div></div>
                 <div class="stat-card"><div class="label">Avg Days / Book</div><div class="value">${avgDaysPerBook > 0 ? avgDaysPerBook.toFixed(1) : '—'}</div></div>
+                <div class="stat-card"><div class="label">Pages / Day</div><div class="value">${pagesPerDay > 0 ? pagesPerDay.toLocaleString() : '—'}</div></div>
                 <div class="stat-card"><div class="label">Words / Day</div><div class="value">${wordsPerDay > 0 ? wordsPerDay.toLocaleString() : '—'}</div></div>
             `;
 
