@@ -2198,7 +2198,7 @@
             const currentYear = new Date().getFullYear();
             const rated = books.filter(b => b.my_rating > 0);
             const avgRating = rated.length > 0 ? (rated.reduce((sum, b) => sum + b.my_rating, 0) / rated.length).toFixed(2) : 0;
-            const totalWords = books.reduce((sum, b) => sum + (b.word_count || 0), 0);
+            const totalWords = books.filter(b => b.status === 'read').reduce((sum, b) => sum + (b.word_count || 0), 0);
             const currentlyReading = books.filter(b => b.status === 'currently-reading').length;
             const toBeRead = books.filter(b => b.status === 'to-read').length;
             const uniqueAuthors = new Set(books.map(b => b.author)).size;
