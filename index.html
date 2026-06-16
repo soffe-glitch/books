@@ -276,6 +276,52 @@
             cursor: not-allowed;
         }
 
+        .cr-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-pause, .btn-resume, .btn-dnf {
+            border: none;
+            padding: 0.5rem 1.1rem;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .btn-pause {
+            background: var(--white);
+            color: var(--gray-500);
+            border: 1px solid var(--gray-300);
+        }
+        .btn-pause:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-resume {
+            background: var(--accent);
+            color: var(--white);
+        }
+        .btn-resume:hover { background: var(--primary); }
+        .btn-dnf {
+            background: var(--white);
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+        .btn-dnf:hover { background: #fef2f2; border-color: #ef4444; }
+        .btn-pause:disabled, .btn-resume:disabled, .btn-dnf:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .cr-card.paused {
+            border-left-color: var(--gray-400);
+            background: var(--gray-50, #f9fafb);
+        }
+        .cr-card.dnf {
+            border-left-color: #ef4444;
+            opacity: 0.92;
+        }
+        .cr-card-duration.paused { color: var(--gray-500); }
+        .cr-card-duration.dnf { color: #b91c1c; }
+
         .cr-empty {
             background: var(--white);
             border-radius: 10px;
@@ -1470,6 +1516,8 @@
                             <option value="unrated">Unrated</option>
                             <option value="to-read">TBR</option>
                             <option value="currently-reading">Currently Reading</option>
+                            <option value="paused">Paused</option>
+                            <option value="dnf">DNF</option>
                         </select>
                         <select id="tagFilter" onchange="currentPage.books=1; applyFilters(); renderBooksTable(); renderBooksPagination();" style="padding:0.4rem 0.75rem; border:1px solid var(--gray-300); border-radius:6px; font-family:'DM Sans',sans-serif;">
                             <option value="all">All Tags</option>
@@ -1769,6 +1817,17 @@
         }
 
         // ============ TAB 1: OVERVIEW ============
+
+        // Active reading days since start, excluding any paused/DNF gaps.
+        // When paused or DNF'd, the counter is frozen at paused_at.
+        function readingDays(b) {
+            if (!b.date_started) return null;
+            const start = new Date(b.date_started.replace(/\//g, '-'));
+            const end = b.paused_at ? new Date(b.paused_at) : new Date();
+            const net = (end - start) / 86400000 - Number(b.paused_days || 0);
+            return Math.max(1, Math.ceil(net));
+        }
+
         function renderOverviewTab() {
             // Currently Reading section
             const crBooks = books.filter(b => b.status === 'currently-reading');
@@ -1780,22 +1839,27 @@
                     if (b.pages) details.push(b.pages + ' pages');
                     if (b.word_count) details.push(b.word_count.toLocaleString() + ' words');
                     if (b.format) details.push(b.format);
+                    const isPaused = !!b.paused_at;
                     let durationHtml = '';
                     if (b.date_started) {
-                        const started = new Date(b.date_started.replace(/\//g, '-'));
-                        const now = new Date();
-                        const days = Math.ceil((now - started) / (1000 * 60 * 60 * 24));
-                        durationHtml = '<div class="cr-card-duration">Day ' + days + ' · started ' + b.date_started + '</div>';
+                        const d = readingDays(b);
+                        durationHtml = isPaused
+                            ? '<div class="cr-card-duration paused">&#9208; Paused on day ' + d + ' · started ' + b.date_started + '</div>'
+                            : '<div class="cr-card-duration">Day ' + d + ' · started ' + b.date_started + '</div>';
                     }
+                    const actions = isPaused
+                        ? '<button class="btn-resume" onclick="resumeReading(' + b.id + ', this)">&#9654; Resume</button>'
+                          + '<button class="btn-finished" onclick="markFinished(' + b.id + ', this)">&#10003; Finished</button>'
+                        : '<button class="btn-finished" onclick="markFinished(' + b.id + ', this)">&#10003; Finished</button>'
+                          + '<button class="btn-pause" onclick="pauseReading(' + b.id + ', this)">&#9208; Pause</button>'
+                          + '<button class="btn-dnf" onclick="dnfBook(' + b.id + ', this)">DNF</button>';
                     crHtml += `
-                        <div class="cr-card">
+                        <div class="cr-card${isPaused ? ' paused' : ''}">
                             <div class="cr-card-title">${b.title}</div>
                             <div class="cr-card-author">${b.author || 'Unknown author'}</div>
                             <div class="cr-card-meta">${details.join(' · ')}</div>
                             ${durationHtml}
-                            <div class="cr-card-actions">
-                                <button class="btn-finished" onclick="markFinished(${b.id}, this)">&#10003; Finished</button>
-                            </div>
+                            <div class="cr-card-actions">${actions}</div>
                         </div>
                     `;
                 });
@@ -1803,7 +1867,38 @@
             } else {
                 crHtml += '<div class="cr-empty">No books currently being read — pick one from your TBR!</div>';
             }
-            document.getElementById('currentlyReadingSection').innerHTML = crHtml;
+
+            // Did Not Finish section
+            const dnfBooks = books.filter(b => b.status === 'dnf');
+            let dnfHtml = '';
+            if (dnfBooks.length > 0) {
+                dnfHtml += '<h3 style="margin-top:1.5rem;">Did Not Finish</h3>';
+                dnfHtml += '<div class="currently-reading-cards">';
+                dnfBooks.forEach(b => {
+                    const details = [];
+                    if (b.pages) details.push(b.pages + ' pages');
+                    if (b.word_count) details.push(b.word_count.toLocaleString() + ' words');
+                    if (b.format) details.push(b.format);
+                    const d = readingDays(b);
+                    const durationHtml = b.date_started
+                        ? '<div class="cr-card-duration dnf">&#128683; DNF on day ' + d + ' · started ' + b.date_started + '</div>'
+                        : '';
+                    dnfHtml += `
+                        <div class="cr-card dnf">
+                            <div class="cr-card-title">${b.title}</div>
+                            <div class="cr-card-author">${b.author || 'Unknown author'}</div>
+                            <div class="cr-card-meta">${details.join(' · ')}</div>
+                            ${durationHtml}
+                            <div class="cr-card-actions">
+                                <button class="btn-resume" onclick="resumeReading(${b.id}, this)">&#9654; Resume reading</button>
+                                <button class="btn-finished" onclick="markFinished(${b.id}, this)">&#10003; Finished</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                dnfHtml += '</div>';
+            }
+            document.getElementById('currentlyReadingSection').innerHTML = crHtml + dnfHtml;
 
             // TBR Picker section
             renderTbrPicker();
@@ -1938,6 +2033,53 @@
             }
         }
 
+        async function pauseReading(bookId, btn) {
+            btn.disabled = true;
+            const pausedAt = new Date().toISOString();
+            try {
+                await supabase.updateBook(bookId, { paused_at: pausedAt });
+                const book = books.find(b => b.id === bookId);
+                if (book) book.paused_at = pausedAt;
+                showToast('"' + (book ? book.title : 'Book') + '" paused — counter stopped.');
+                renderOverviewTab();
+            } catch (e) {
+                alert('Could not pause book: ' + e.message);
+                btn.disabled = false;
+            }
+        }
+
+        async function resumeReading(bookId, btn) {
+            btn.disabled = true;
+            const book = books.find(b => b.id === bookId);
+            const addDays = (book && book.paused_at) ? (new Date() - new Date(book.paused_at)) / 86400000 : 0;
+            const newPausedDays = Number(book && book.paused_days || 0) + addDays;
+            const updates = { status: 'currently-reading', paused_at: null, paused_days: newPausedDays };
+            try {
+                await supabase.updateBook(bookId, updates);
+                if (book) Object.assign(book, updates);
+                showToast('"' + (book ? book.title : 'Book') + '" resumed — counter running again.');
+                renderOverviewTab();
+            } catch (e) {
+                alert('Could not resume book: ' + e.message);
+                btn.disabled = false;
+            }
+        }
+
+        async function dnfBook(bookId, btn) {
+            btn.disabled = true;
+            const updates = { status: 'dnf', paused_at: new Date().toISOString() };
+            try {
+                await supabase.updateBook(bookId, updates);
+                const book = books.find(b => b.id === bookId);
+                if (book) Object.assign(book, updates);
+                showToast('"' + (book ? book.title : 'Book') + '" marked as DNF.');
+                renderOverviewTab();
+            } catch (e) {
+                alert('Could not DNF book: ' + e.message);
+                btn.disabled = false;
+            }
+        }
+
         function markFinished(bookId, btn) {
             const book = books.find(b => b.id === bookId);
             if (!book) return;
@@ -1986,6 +2128,13 @@
             const dateRead = today.getFullYear() + '/' + String(today.getMonth() + 1).padStart(2, '0') + '/' + String(today.getDate()).padStart(2, '0');
             const updates = { status: 'read', date_read: dateRead, finished_at: today.toISOString() };
             if (dialogRating > 0) updates.my_rating = dialogRating;
+            // Fold any open pause/DNF gap into paused_days so the final duration excludes it.
+            const finishingBook = books.find(b => b.id === bookId);
+            if (finishingBook && finishingBook.paused_at) {
+                const addDays = (today - new Date(finishingBook.paused_at)) / 86400000;
+                updates.paused_days = Number(finishingBook.paused_days || 0) + addDays;
+                updates.paused_at = null;
+            }
             try {
                 await supabase.updateBook(bookId, updates);
                 const book = books.find(b => b.id === bookId);
@@ -2049,6 +2198,10 @@
                 filteredBooks = filteredBooks.filter(b => b.status === 'to-read');
             } else if (quickFilter === 'currently-reading') {
                 filteredBooks = filteredBooks.filter(b => b.status === 'currently-reading');
+            } else if (quickFilter === 'paused') {
+                filteredBooks = filteredBooks.filter(b => b.status === 'currently-reading' && b.paused_at);
+            } else if (quickFilter === 'dnf') {
+                filteredBooks = filteredBooks.filter(b => b.status === 'dnf');
             }
 
             const tagFilter = document.getElementById('tagFilter')?.value || 'all';
@@ -2227,8 +2380,8 @@
                 b.started_at && b.finished_at && new Date(b.finished_at) > new Date(b.started_at)
             );
             const avgDaysPerBook = yearReadWithDuration.length > 0
-                ? yearReadWithDuration.reduce((s, b) => s + (new Date(b.finished_at) - new Date(b.started_at)), 0)
-                  / 86400000 / yearReadWithDuration.length
+                ? yearReadWithDuration.reduce((s, b) => s + (new Date(b.finished_at) - new Date(b.started_at)) / 86400000 - Number(b.paused_days || 0), 0)
+                  / yearReadWithDuration.length
                 : 0;
 
             document.getElementById('overviewStats').innerHTML = `
@@ -2314,7 +2467,7 @@
                 if (b.date_started && b.date_read) {
                     const s = new Date(b.date_started.replace(/\//g, '-'));
                     const e = new Date(b.date_read.replace(/\//g, '-'));
-                    const days = Math.ceil((e - s) / (1000 * 60 * 60 * 24));
+                    const days = Math.ceil((e - s) / (1000 * 60 * 60 * 24) - Number(b.paused_days || 0));
                     if (days >= 0) durationText = '<span style="color:var(--gray-400); font-size:0.8rem;"> · ' + days + (days === 1 ? ' day' : ' days') + '</span>';
                 }
                 recentHtml += `<tr><td>${b.title}${tagBadge}</td><td>${b.author}</td><td>${renderStars(b.my_rating)}</td><td>${b.date_read}${durationText}</td></tr>`;
@@ -2402,7 +2555,7 @@
             const booksWithDuration = readBooks.filter(b => b.date_started && b.date_read).map(b => {
                 const s = new Date(b.date_started.replace(/\//g, '-'));
                 const e = new Date(b.date_read.replace(/\//g, '-'));
-                const days = Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24)));
+                const days = Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24) - Number(b.paused_days || 0)));
                 return { ...b, readingDays: days };
             }).filter(b => b.readingDays > 0 && b.readingDays < 365);
 
@@ -2989,6 +3142,7 @@
                             <option value="read">Read</option>
                             <option value="currently-reading">Currently reading</option>
                             <option value="to-read">To be read (TBR)</option>
+                            <option value="dnf">Did not finish (DNF)</option>
                         </select>
                     </div>
                     <div class="form-group">
