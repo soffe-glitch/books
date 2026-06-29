@@ -1,0 +1,28 @@
+name: Keep Supabase Awake
+
+# Pings the Supabase database twice a week so the free project
+# is never paused for 7 days of inactivity.
+# Runs on GitHub's servers — works even when your computer is off.
+
+on:
+  schedule:
+    # 06:00 UTC every Monday and Thursday (gaps of 3-4 days, well under 7)
+    - cron: "0 6 * * 1,4"
+  workflow_dispatch: {} # lets you trigger it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping books table
+        run: |
+          echo "Pinging Supabase at $(date -u)"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://fhlotfddxcpczokbvzdq.supabase.co/rest/v1/books?select=id&limit=1" \
+            -H "apikey: sb_publishable_j5HwrulwEUxT9WVKjTsRsg_bYyaRa9r")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Unexpected status — ping may have failed."
+            exit 1
+          fi
+          echo "Database is awake."
