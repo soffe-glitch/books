@@ -1,0 +1,73 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Book Dashboard</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg); color:var(--primary); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .primary { fill:var(--primary); }
+  .accent { fill:var(--accent); }
+  .tint { fill:var(--accent-light); }
+  .pink { fill:var(--badge-pink); }
+  .h1 { fill:var(--heat-1); } .h2 { fill:var(--heat-2); } .h3 { fill:var(--heat-3); } .h4 { fill:var(--heat-4); }
+  .blk { rx:var(--radius-xl); }
+  .t { rx:var(--radius-sm); }
+  .words { position:absolute; left:var(--space-8); bottom:var(--space-8); max-width:440px; }
+  .name { margin:0; font-family:var(--font-display); font-size:84px; line-height:.95; font-weight:700; letter-spacing:-.01em; color:var(--primary); }
+  .tag { margin:var(--space-3) 0 0 2px; font-size:14px; line-height:20px; color:var(--gray-500); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      primary 184x256 bled off the top and right (the header band, the brand's identity) · accent 112x176 · accent-light 144x104 (the tint) · badge-pink pill 64x24 once (Dramione only) — about 40% of 960x288
+  arrangement one tall primary slab with satellites stepping down to the left, bottoms on one line space-8 above the edge
+  pattern     tiles, from the Reading Journey heatmap ("a month x year grid shaded by books finished"): 24x20 cells at a 32/28 pitch in heat-1..heat-4, cut into the slab and the tint
+  scales      gutters space-4; corners radius-xl on blocks, radius-sm on tiles, pill rx half its height
+-->
+<rect class="primary blk" x="304" y="-24" width="200" height="280" rx="10"/>
+<rect class="accent blk" x="176" y="80" width="112" height="176" rx="10"/>
+<rect class="tint blk" x="16" y="120" width="144" height="104" rx="10"/>
+<rect class="pink" x="16" y="232" width="64" height="24" rx="12"/>
+<rect class="h2 t" x="328" y="40" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="360" y="40" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="392" y="40" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="424" y="40" width="24" height="20" rx="4"/>
+<rect class="h1 t" x="328" y="68" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="360" y="68" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="392" y="68" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="424" y="68" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="328" y="96" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="360" y="96" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="392" y="96" width="24" height="20" rx="4"/>
+<rect class="h1 t" x="424" y="96" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="328" y="124" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="360" y="124" width="24" height="20" rx="4"/>
+<rect class="h1 t" x="392" y="124" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="424" y="124" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="328" y="152" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="360" y="152" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="392" y="152" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="424" y="152" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="32" y="136" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="64" y="136" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="96" y="136" width="24" height="20" rx="4"/>
+<rect class="h4 t" x="32" y="164" width="24" height="20" rx="4"/>
+<rect class="h3 t" x="64" y="164" width="24" height="20" rx="4"/>
+<rect class="h2 t" x="128" y="164" width="24" height="20" rx="4"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Book<br>Dashboard</h1>
+<p class="tag">Track your reading journey across all platforms</p>
+</div>
+</div>
+</body>
+</html>
