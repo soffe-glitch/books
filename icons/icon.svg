@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Book Dashboard app icon: book spines on a shelf, in the dashboard's greens with one Dramione-pink spine.
+       Artwork stays inside the central 70% so it survives maskable/rounded crops. -->
+  <rect width="1024" height="1024" fill="#064e3b"/>
+  <g>
+    <!-- spine 1: mint -->
+    <rect x="262" y="318" width="118" height="416" rx="22" fill="#d1fae5"/>
+    <rect x="262" y="372" width="118" height="22" fill="#064e3b" opacity=".18"/>
+    <rect x="262" y="660" width="118" height="22" fill="#064e3b" opacity=".18"/>
+    <!-- spine 2: emerald, tallest -->
+    <rect x="398" y="262" width="140" height="472" rx="22" fill="#34d399"/>
+    <rect x="398" y="318" width="140" height="22" fill="#064e3b" opacity=".22"/>
+    <rect x="398" y="352" width="140" height="10" fill="#064e3b" opacity=".22"/>
+    <rect x="398" y="652" width="140" height="22" fill="#064e3b" opacity=".22"/>
+    <!-- spine 3: Dramione pink -->
+    <rect x="556" y="346" width="104" height="388" rx="22" fill="#f472b6"/>
+    <rect x="556" y="398" width="104" height="18" fill="#064e3b" opacity=".2"/>
+    <rect x="556" y="666" width="104" height="18" fill="#064e3b" opacity=".2"/>
+    <!-- spine 4: leaning against the pink one -->
+    <g transform="rotate(16 676 734)">
+      <rect x="676" y="378" width="108" height="356" rx="22" fill="#a7f3d0"/>
+      <rect x="676" y="428" width="108" height="18" fill="#064e3b" opacity=".18"/>
+      <rect x="676" y="664" width="108" height="18" fill="#064e3b" opacity=".18"/>
+    </g>
+    <!-- shelf -->
+    <rect x="224" y="734" width="576" height="30" rx="15" fill="#d1fae5"/>
+  </g>
+</svg>
