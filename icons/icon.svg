@@ -1,28 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <!-- Book Dashboard app icon: book spines on a shelf, in the dashboard's greens with one Dramione-pink spine.
-       Artwork stays inside the central 70% so it survives maskable/rounded crops. -->
+  <!-- Book Dashboard app icon: Sofie's shelf. Book spines in the dashboard greens, an italic S on the
+       tallest spine, a heart on the Dramione-pink spine, one book leaning. Art stays in the central safe zone. -->
   <rect width="1024" height="1024" fill="#064e3b"/>
-  <g>
-    <!-- spine 1: mint -->
-    <rect x="262" y="318" width="118" height="416" rx="22" fill="#d1fae5"/>
-    <rect x="262" y="372" width="118" height="22" fill="#064e3b" opacity=".18"/>
-    <rect x="262" y="660" width="118" height="22" fill="#064e3b" opacity=".18"/>
-    <!-- spine 2: emerald, tallest -->
-    <rect x="398" y="262" width="140" height="472" rx="22" fill="#34d399"/>
-    <rect x="398" y="318" width="140" height="22" fill="#064e3b" opacity=".22"/>
-    <rect x="398" y="352" width="140" height="10" fill="#064e3b" opacity=".22"/>
-    <rect x="398" y="652" width="140" height="22" fill="#064e3b" opacity=".22"/>
-    <!-- spine 3: Dramione pink -->
-    <rect x="556" y="346" width="104" height="388" rx="22" fill="#f472b6"/>
-    <rect x="556" y="398" width="104" height="18" fill="#064e3b" opacity=".2"/>
-    <rect x="556" y="666" width="104" height="18" fill="#064e3b" opacity=".2"/>
-    <!-- spine 4: leaning against the pink one -->
-    <g transform="rotate(16 676 734)">
-      <rect x="676" y="378" width="108" height="356" rx="22" fill="#a7f3d0"/>
-      <rect x="676" y="428" width="108" height="18" fill="#064e3b" opacity=".18"/>
-      <rect x="676" y="664" width="108" height="18" fill="#064e3b" opacity=".18"/>
-    </g>
-    <!-- shelf -->
-    <rect x="224" y="734" width="576" height="30" rx="15" fill="#d1fae5"/>
+  <rect x="262" y="318" width="118" height="416" rx="22" fill="#d1fae5"/>
+  <rect x="262" y="372" width="118" height="22" fill="#064e3b" opacity=".18"/>
+  <rect x="262" y="660" width="118" height="22" fill="#064e3b" opacity=".18"/>
+  <rect x="398" y="232" width="150" height="502" rx="22" fill="#34d399"/>
+  <rect x="398" y="286" width="150" height="16" fill="#064e3b" opacity=".25"/>
+  <rect x="398" y="664" width="150" height="16" fill="#064e3b" opacity=".25"/>
+  <!-- italic S (Newsreader Italic, outlined) on the tallest spine -->
+  <path transform="translate(402.7 567.4) scale(0.115 -0.115)" d="M1055 1257Q1009 1322 934.0 1361.0Q859 1400 761 1400Q667 1400 600.5 1370.0Q534 1340 499.0 1283.5Q464 1227 464 1148Q464 1069 499.5 1017.0Q535 965 592.0 927.5Q649 890 713 852Q777 815 841.5 768.0Q906 721 949.0 647.5Q992 574 992 456Q992 317 920.0 209.0Q848 101 715.0 39.5Q582 -22 399 -22Q296 -22 207.0 -6.5Q118 9 46 40L44 423H73L218 22L123 120Q187 76 250.0 51.0Q313 26 402 26Q524 26 613.0 63.0Q702 100 749.5 174.0Q797 248 797 358Q797 433 770.0 484.5Q743 536 699.0 572.0Q655 608 604.5 635.5Q554 663 508 690Q446 728 397.0 771.5Q348 815 319.5 877.0Q291 939 291 1032Q291 1157 352.0 1251.5Q413 1346 525.5 1399.0Q638 1452 789 1452Q893 1452 978.0 1425.0Q1063 1398 1150 1344L1028 1376L1162 1489H1178L1129 1013H1105L1012 1346Z" fill="#064e3b"/>
+  <rect x="566" y="346" width="104" height="388" rx="22" fill="#f472b6"/>
+  <path d="M618 520 C 596 504, 580 490, 580 474 C 580 461, 590 452, 601 452 C 609 452, 615 457, 618 463 C 621 457, 627 452, 635 452 C 646 452, 656 461, 656 474 C 656 490, 640 504, 618 520 Z" fill="#fdf0f6"/>
+  <g transform="rotate(16 686 734)">
+    <rect x="686" y="378" width="108" height="356" rx="22" fill="#a7f3d0"/>
+    <rect x="686" y="428" width="108" height="18" fill="#064e3b" opacity=".18"/>
   </g>
+  <rect x="224" y="734" width="586" height="30" rx="15" fill="#d1fae5"/>
 </svg>
