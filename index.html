@@ -1203,8 +1203,8 @@
                 if (tbrPickerFilters.tag === 'non-dramione' && b.tag === 'Dramione') return false;
                 if (tbrPickerFilters.length !== 'any') {
                     const pg = effectivePages(b);
-                    if (tbrPickerFilters.length === 'long' && pg <= 300) return false;
-                    if (tbrPickerFilters.length === 'short' && (pg === 0 || pg > 300)) return false;
+                    if (tbrPickerFilters.length === 'long' && pg < 500) return false;
+                    if (tbrPickerFilters.length === 'short' && (pg === 0 || pg >= 500)) return false;
                 }
                 return true;
             });
@@ -1242,8 +1242,8 @@
             html += '<span class="tbr-filter-label">Length</span>';
             html += '<div class="tbr-segmented">';
             html += '<button class="tbr-seg' + (f.length==='any'?' active':'') + '" onclick="setTbrFilter(\'length\',\'any\')">Any</button>';
-            html += '<button class="tbr-seg' + (f.length==='long'?' active':'') + '" onclick="setTbrFilter(\'length\',\'long\')">Long (&gt;300 pg)</button>';
-            html += '<button class="tbr-seg' + (f.length==='short'?' active':'') + '" onclick="setTbrFilter(\'length\',\'short\')">Short (&le;300 pg)</button>';
+            html += '<button class="tbr-seg' + (f.length==='long'?' active':'') + '" onclick="setTbrFilter(\'length\',\'long\')">Long (500+ pg)</button>';
+            html += '<button class="tbr-seg' + (f.length==='short'?' active':'') + '" onclick="setTbrFilter(\'length\',\'short\')">Short (&lt;500 pg)</button>';
             html += '</div></div>';
             html += '</div>';
 
