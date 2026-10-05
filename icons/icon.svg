@@ -1,113 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <!-- Sofie: front-facing portrait, long wavy strawberry-blond hair swept back, dark panto glasses,
-       gold studs and pendant, white V-neck, a pink book held at the chest. Gothic window behind (reading-hall nod). -->
+  <!-- Book Dashboard app icon: Sofie's shelf. Book spines in the dashboard greens, an italic S on the
+       tallest spine, a heart on the Dramione-pink spine, one book leaning. Art stays in the central safe zone. -->
   <rect width="1024" height="1024" fill="#064e3b"/>
-  <!-- gothic window, quiet tone-on-tone -->
-  <g fill="#0a5c46">
-    <path d="M110 760 V330 C 110 230, 170 170, 230 140 C 290 170, 350 230, 350 330 V760 Z"/>
-    <path d="M674 760 V330 C 674 230, 734 170, 794 140 C 854 170, 914 230, 914 330 V760 Z"/>
+  <rect x="262" y="318" width="118" height="416" rx="22" fill="#d1fae5"/>
+  <rect x="262" y="372" width="118" height="22" fill="#064e3b" opacity=".18"/>
+  <rect x="262" y="660" width="118" height="22" fill="#064e3b" opacity=".18"/>
+  <rect x="398" y="232" width="150" height="502" rx="22" fill="#34d399"/>
+  <rect x="398" y="286" width="150" height="16" fill="#064e3b" opacity=".25"/>
+  <rect x="398" y="664" width="150" height="16" fill="#064e3b" opacity=".25"/>
+  <!-- italic S (Newsreader Italic, outlined) on the tallest spine -->
+  <path transform="translate(402.7 567.4) scale(0.115 -0.115)" d="M1055 1257Q1009 1322 934.0 1361.0Q859 1400 761 1400Q667 1400 600.5 1370.0Q534 1340 499.0 1283.5Q464 1227 464 1148Q464 1069 499.5 1017.0Q535 965 592.0 927.5Q649 890 713 852Q777 815 841.5 768.0Q906 721 949.0 647.5Q992 574 992 456Q992 317 920.0 209.0Q848 101 715.0 39.5Q582 -22 399 -22Q296 -22 207.0 -6.5Q118 9 46 40L44 423H73L218 22L123 120Q187 76 250.0 51.0Q313 26 402 26Q524 26 613.0 63.0Q702 100 749.5 174.0Q797 248 797 358Q797 433 770.0 484.5Q743 536 699.0 572.0Q655 608 604.5 635.5Q554 663 508 690Q446 728 397.0 771.5Q348 815 319.5 877.0Q291 939 291 1032Q291 1157 352.0 1251.5Q413 1346 525.5 1399.0Q638 1452 789 1452Q893 1452 978.0 1425.0Q1063 1398 1150 1344L1028 1376L1162 1489H1178L1129 1013H1105L1012 1346Z" fill="#064e3b"/>
+  <rect x="566" y="346" width="104" height="388" rx="22" fill="#f472b6"/>
+  <path d="M618 520 C 596 504, 580 490, 580 474 C 580 461, 590 452, 601 452 C 609 452, 615 457, 618 463 C 621 457, 627 452, 635 452 C 646 452, 656 461, 656 474 C 656 490, 640 504, 618 520 Z" fill="#fdf0f6"/>
+  <g transform="rotate(16 686 734)">
+    <rect x="686" y="378" width="108" height="356" rx="22" fill="#a7f3d0"/>
+    <rect x="686" y="428" width="108" height="18" fill="#064e3b" opacity=".18"/>
   </g>
-  <g stroke="#064e3b" stroke-width="8" fill="none" opacity=".9">
-    <path d="M230 160 V760 M110 420 H350 M110 560 H350"/>
-    <path d="M794 160 V760 M674 420 H914 M674 560 H914"/>
-  </g>
-
-  <!-- hair, back mass: long waves past the shoulders -->
-  <path d="M512 196
-           C 400 196, 340 270, 336 370
-           C 332 440, 312 490, 322 560
-           C 332 620, 296 670, 306 740
-           C 314 800, 280 850, 296 910
-           L 360 930
-           C 370 870, 400 830, 392 770
-           C 386 720, 412 680, 404 620
-           L 620 620
-           C 612 680, 638 720, 632 770
-           C 624 830, 654 870, 664 930
-           L 728 910
-           C 744 850, 710 800, 718 740
-           C 728 670, 692 620, 702 560
-           C 712 490, 692 440, 688 370
-           C 684 270, 624 196, 512 196 Z" fill="#c48a52"/>
-
-  <!-- hair behind neck and shoulders -->
-  <path d="M370 470 C 360 600, 380 720, 360 860 L 664 860 C 644 720, 664 600, 654 470 Z" fill="#b07a45"/>
-  <!-- top: white V-neck, slim shoulders -->
-  <path d="M276 1024 C 286 900, 340 846, 430 826 L 512 940 L 594 826 C 684 846, 738 900, 748 1024 Z" fill="#f4efe6"/>
-  <!-- neck and chest -->
-  <path d="M466 560 C 470 640, 464 720, 448 790 C 470 830, 490 880, 512 940 C 534 880, 554 830, 576 790 C 560 720, 554 640, 558 560 Z" fill="#dfa181"/>
-  <path d="M470 700 C 492 720, 532 720, 554 700" stroke="#c98b6c" stroke-width="6" fill="none" opacity=".6"/>
-  <!-- gold necklace and pendant -->
-  <path d="M458 760 C 474 820, 494 846, 512 852 C 530 846, 550 820, 566 760" stroke="#d7b04c" stroke-width="4" fill="none"/>
-  <circle cx="512" cy="866" r="13" fill="#e2bb52"/>
-  <circle cx="508" cy="862" r="4" fill="#f6dc8c"/>
-
-  <!-- face: slim oval with a narrow chin -->
-  <path d="M512 252
-           C 584 252, 628 304, 630 380
-           C 632 440, 618 500, 588 546
-           C 566 580, 540 598, 512 598
-           C 484 598, 458 580, 436 546
-           C 406 500, 392 440, 394 380
-           C 396 304, 440 252, 512 252 Z" fill="#e9b394"/>
-  <!-- ears with gold studs -->
-  <path d="M396 400 C 380 396, 374 420, 380 440 C 386 462, 398 468, 404 462 Z" fill="#dfa181"/>
-  <path d="M628 400 C 644 396, 650 420, 644 440 C 638 462, 626 468, 620 462 Z" fill="#dfa181"/>
-  <circle cx="386" cy="452" r="5" fill="#e2bb52"/>
-  <circle cx="638" cy="452" r="5" fill="#e2bb52"/>
-
-  <!-- hair, front: swept back from the forehead, strands falling beside the face -->
-  <path d="M512 206
-           C 430 206, 376 254, 366 330
-           C 360 380, 372 420, 386 450
-           C 384 400, 394 330, 430 290
-           C 460 262, 490 254, 512 254
-           C 534 254, 564 262, 594 290
-           C 630 330, 640 400, 638 450
-           C 652 420, 664 380, 658 330
-           C 648 254, 594 206, 512 206 Z" fill="#c48a52"/>
-  <!-- face-framing waves -->
-  <path d="M384 450 C 366 510, 396 560, 378 620 C 366 660, 386 700, 380 740" stroke="#c48a52" stroke-width="44" fill="none" stroke-linecap="round"/>
-  <path d="M640 450 C 658 510, 628 560, 646 620 C 658 660, 638 700, 644 740" stroke="#c48a52" stroke-width="44" fill="none" stroke-linecap="round"/>
-  <!-- highlights and shadow strands -->
-  <path d="M450 228 C 420 250, 398 290, 392 340" stroke="#e3b779" stroke-width="10" fill="none" stroke-linecap="round"/>
-  <path d="M574 228 C 604 250, 626 290, 632 340" stroke="#e3b779" stroke-width="10" fill="none" stroke-linecap="round"/>
-  <path d="M512 210 C 512 226, 512 240, 512 254" stroke="#a87444" stroke-width="5" opacity=".6"/>
-  <path d="M344 500 C 330 560, 356 610, 340 670 C 326 720, 350 770, 332 840" stroke="#e3b779" stroke-width="10" fill="none" stroke-linecap="round"/>
-  <path d="M680 500 C 694 560, 668 610, 684 670 C 698 720, 674 770, 692 840" stroke="#e3b779" stroke-width="10" fill="none" stroke-linecap="round"/>
-  <path d="M392 640 C 404 690, 384 730, 400 790 C 410 830, 398 860, 404 900" stroke="#c48a52" stroke-width="30" fill="none" stroke-linecap="round"/>
-  <path d="M632 640 C 620 690, 640 730, 624 790 C 614 830, 626 860, 620 900" stroke="#c48a52" stroke-width="30" fill="none" stroke-linecap="round"/>
-  <path d="M370 760 C 360 800, 380 840, 366 890" stroke="#a87444" stroke-width="9" fill="none" stroke-linecap="round" opacity=".8"/>
-  <path d="M654 760 C 664 800, 644 840, 658 890" stroke="#a87444" stroke-width="9" fill="none" stroke-linecap="round" opacity=".8"/>
-
-  <!-- brows -->
-  <path d="M436 372 C 452 362, 476 360, 494 366" stroke="#a87444" stroke-width="7" fill="none" stroke-linecap="round"/>
-  <path d="M530 366 C 548 360, 572 362, 588 372" stroke="#a87444" stroke-width="7" fill="none" stroke-linecap="round"/>
-  <!-- eyes, open -->
-  <path d="M442 410 C 452 398, 478 396, 490 410 C 478 420, 454 420, 442 410 Z" fill="#ffffff"/>
-  <path d="M534 410 C 546 396, 572 398, 582 410 C 570 420, 546 420, 534 410 Z" fill="#ffffff"/>
-  <circle cx="467" cy="409" r="9" fill="#4a3a2a"/>
-  <circle cx="558" cy="409" r="9" fill="#4a3a2a"/>
-  <path d="M440 410 C 452 396, 478 394, 492 408" stroke="#2a1f1a" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <path d="M532 408 C 546 394, 572 396, 584 410" stroke="#2a1f1a" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <!-- nose -->
-  <path d="M506 420 C 502 446, 498 468, 504 478 C 510 484, 520 482, 524 476" stroke="#c98b6c" stroke-width="5" fill="none" stroke-linecap="round"/>
-  <!-- soft closed smile -->
-  <path d="M478 520 C 494 530, 530 530, 546 520 C 534 540, 492 540, 478 520 Z" fill="#c2615d"/>
-  <path d="M474 518 C 492 532, 532 532, 550 518" stroke="#a84e4c" stroke-width="3" fill="none" stroke-linecap="round"/>
-
-  <!-- dark panto glasses (round with a slightly flat brow line), gold temples -->
-  <path d="M418 386 C 440 376, 482 376, 500 388 C 510 414, 504 442, 484 454 C 464 466, 434 462, 422 446 C 410 430, 408 402, 418 386 Z" fill="#ffffff" fill-opacity=".1" stroke="#2a1f1a" stroke-width="8" stroke-linejoin="round"/>
-  <path d="M606 386 C 584 376, 542 376, 524 388 C 514 414, 520 442, 540 454 C 560 466, 590 462, 602 446 C 614 430, 616 402, 606 386 Z" fill="#ffffff" fill-opacity=".1" stroke="#2a1f1a" stroke-width="8" stroke-linejoin="round"/>
-  <path d="M500 394 C 506 386, 518 386, 524 394" stroke="#2a1f1a" stroke-width="7" fill="none"/>
-  <path d="M418 390 L 398 400 M606 390 L 626 400" stroke="#c9a34a" stroke-width="5" stroke-linecap="round"/>
-
-  <!-- pink book held at the chest, cover toward us -->
-  <g transform="rotate(-6 512 940)">
-    <rect x="372" y="872" width="292" height="200" rx="10" fill="#ec4899"/>
-    <rect x="372" y="872" width="26" height="200" rx="6" fill="#be185d"/>
-    <rect x="652" y="880" width="8" height="190" fill="#fdf0f6" opacity=".8"/>
-    <rect x="434" y="914" width="176" height="6" rx="3" fill="#fdf0f6" opacity=".75"/>
-    <rect x="460" y="932" width="124" height="4" rx="2" fill="#fdf0f6" opacity=".5"/>
-  </g>
+  <rect x="224" y="734" width="586" height="30" rx="15" fill="#d1fae5"/>
 </svg>
