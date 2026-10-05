@@ -1,22 +1,18 @@
 # ReadingCard
 
-A book in progress: title, author, series, size, how long it has been going, and what to do next.
+A book in progress. State is a chip at the top, not a coloured edge.
 
-## Anatomy (top to bottom, gap `space-2`)
-1. Title — `panel-title` in `gray-900` (Playfair).
-2. Author — `author` in `gray-500`; "Unknown author" if missing.
-3. Series link (optional) — `.series-line`: 📚 + series + #order, 0.75rem/600 `accent`, underline on hover.
-4. Meta — pages · words · format, `meta` in `gray-400`, joined with " · ".
-5. Duration — "Day 12 · started 2026/09/23" in `accent` 500.
-6. Actions — `.btn-primary` first, then outline, then DNF.
+## Anatomy
+1. Status chip (`.cr-card-duration`, `chip` type) — `mint`/`forest` "Day 12 · started …" while reading; `wash`/`ink-2` "⏸ Paused on day N" when paused; `danger-wash`/`danger` for DNF. It is placed last in the markup and moved to the top with CSS `order`.
+2. Title in `book-title` (`ink`).
+3. Author in italic `author` (`muted`).
+4. Series link (optional): 📚 + series + "#n of N" in `emerald-ink`.
+5. Meta: pages · words · format in `meta` (`faint`).
+6. Actions under a `line` hairline.
 
 ## States
-- Active: 5px `accent` left rule.
-- `.paused`: `gray-400` rule, `gray-50` ground, duration "⏸ Paused on day N" in `gray-500`; actions become ▶ Resume + ✓ Finished.
-- `.dnf`: `danger` rule, `opacity-dnf`, duration in `danger-text`.
+- Reading: `paper`, `line` border, `radius-lg`, `shadow-card`.
+- `.paused`: `bg` ground, dashed `line-strong` border, no shadow; title drops to `ink-2`. Paused cards sort last.
+- `.dnf`: 92% opacity with the danger chip.
 
-## Related
-- `.tbr-pick-card` — the random TBR pick: same anatomy with a 5px `primary` rule, `shadow-pick`, max 500px, revealed with a 0.4s rise-and-scale; actions Start reading + Pick again.
-- Lay cards in a grid of `minmax(320px, 1fr)` with gap `space-5`. Paused cards sort last.
-
-Source classes: `.cr-card*`, `.tbr-pick-card`, `.series-line`.
+Lay out in a grid of `minmax(320px, 1fr)` with `space-4` gaps.

@@ -1,11 +1,7 @@
 # FilterChips
 
-A wrapping row of toggle buttons that filters the book list by one field.
+The All Books filter panel: pill search, chip rows, quiet selects.
 
-## Use
-- Group label above in `ui` / `gray-700` (`.filter-group-label`).
-- Chips: 2px `gray-300` border, `radius-md`, 0.875rem/500. Hover: `accent` border and label. Active: `accent` fill, `white` label.
-- One active chip per group; "All" first.
-- Mobile: 0.4rem 0.75rem at 0.75rem, gap 0.25rem.
-
-Source classes: `.filter-buttons`, `.filter-button`, `.filter-group label`.
+- Search is a pill on `bg` with a magnifier; it turns `paper` with an `emerald-ink` border and `mint` halo on focus. Placeholder names the fields searched.
+- Each group has a `label` caption. Chips are `control` type pills with `line-strong` borders; hover `emerald-ink`; active `forest` fill.
+- Selects use `.select-quiet` (pill, chevron). Utility actions like Export Backup sit at the far right as `.btn-quiet`.

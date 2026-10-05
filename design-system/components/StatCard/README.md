@@ -1,13 +1,8 @@
 # StatCard
 
-A single headline figure with an uppercase label, on a white card capped by a 4px `accent` rule.
+Totals in a single ledger: one bordered card divided by hairlines into cells.
 
-## Use
-- Group in `.stats-grid` (auto-fit, min 200px, gap `space-6`).
-- Label in `stat-label` (`gray-500`, uppercase, 0.05em); value in `stat-value` (`primary`, Playfair).
-- `.compact` variant (3px rule, 1.5rem value, 0.75rem label, 1rem padding) for the totals row in Statistics, grid min 140px.
-
-## Consumer supplies
-Label and a pre-formatted value (thousands separators, abbreviations like 48.2M).
-
-Source classes: `.stat-card`, `.stats-grid`, `.stats-totals`.
+- `.stats-totals` is the card (`paper`, `line` border, `radius-lg`); each `.stat-card` cell draws its own right and bottom hairline, so an uneven last row leaves white space.
+- Label in `label`, value in `stat-value` (`forest`, lining tabular numerals). Long numbers wrap rather than overflow.
+- Two columns on phones.
+- Standalone cards (`.stats-grid .stat-card`) get their own `line` border and `radius-lg`.
