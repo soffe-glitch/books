@@ -1,16 +1,11 @@
 # Header
 
-The full-width `primary` band that opens the page: the dashboard name in `dashboard-title`, one line of subtitle, and the add actions as ghost buttons.
+The forest masthead and its tab bar: one continuous green block at the top of every view.
 
 ## Use
-- One per page, at the very top, above the TabBar.
-- Text is `white` on `primary`. The title is the only `dashboard-title` on the page.
-- Actions are `.header-btn` (white ghost: `header-btn-fill` ground, `header-btn-border` border). The Dramione action adds `.header-btn-dramione` (pink ghost) — it is the only place pink appears in the header.
+- Title in `dashboard-title` (`paper`), subtitle in italic `subtitle` (`mint-on-forest`), left-aligned on a 1200px column.
+- Actions sit right, vertically centred: `+ Add Book` is a `mint` pill with `forest` text; `+ Add Dramione` is a ghost pill with a `dramione-on-forest` dot. That dot is the only pink in the masthead.
+- The tab bar continues the forest ground and is sticky. Tabs are `tab` type at 72% white; the active tab is `paper` with a 3px `mint-on-forest` underline.
+- Mobile (≤768px): actions drop under the subtitle; tabs share the width equally.
 
-## Consumer supplies
-Title text, subtitle, and 1–2 buttons. Labels start with "+ " for create actions ("+ Add Book").
-
-## Mobile (≤768px)
-Padding 1.25rem 1rem, title 1.5rem, subtitle 0.8rem, buttons 0.4rem 0.75rem at 0.75rem.
-
-Source classes: `.header`, `.header-actions`, `.header-btn`, `.header-btn-dramione`.
+Source: `.header`, `.header-actions`, `.header-btn(-dramione)`, `.tab-bar`, `.tab-button`.

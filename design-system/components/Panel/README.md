@@ -1,15 +1,8 @@
 # Panel
 
-The white containers that hold every Statistics section: a plain panel, an emphasized hero, and accent-topped variants.
+White containers for every Statistics section, plus one larger hero.
 
-## Variants
-- `.stats-panel` — `white`, `radius-xl`, `shadow-soft`, padding `space-6`. Its `h3` is `panel-title` in `primary` with a 1px `gray-100` underline.
-- `.stats-hero` — the one hero per view: `radius-2xl`, `shadow-raised`, 2rem padding, 4px `accent` top rule, `h2` in `hero-title`. Holds the Reading Pace numbers (`pace-number` / `pace-label`) and a 10px year-progress bar.
-- `.wrapped-panel` adds the 4px `accent` top rule; `.dramione-panel` uses a 4px `badge-pink` rule.
-
-## Rules
-- Stack panels with `space-6` between; use a two-column grid (`.stats-two-col`) above 768px, one column below.
-- Pace numbers color by meaning: actuals `primary`, rate `accent`, projections `gray-400`.
-- Empty panels show one line in `gray-400` at 0.85rem saying how to fill them ("Add start dates to your books to see reading speed stats.").
-
-Source classes: `.stats-panel`, `.stats-hero`, `.pace-*`, `.chart-container`, `.recently-read`.
+- `.stats-panel`: `paper`, `line` border, `radius-lg`, 1.35rem 1.5rem padding; heading in `panel-title` (`forest`), no underline.
+- `.stats-hero`: `radius-xl`, larger padding, heading in `section-title`. Holds the Reading Pace figures in `pace-number`, coloured by meaning (actuals `forest`, rate `emerald-ink`, projections `faint`) with `label` captions, and a year-progress bar.
+- Stack with `space-4` gaps; two columns above 768px (`.stats-two-col`).
+- Empty panels: one `faint` line saying how to fill them.
