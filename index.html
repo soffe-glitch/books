@@ -1365,6 +1365,13 @@
             color: var(--primary);
             margin-bottom: 1.5rem;
         }
+        .series-line { font-size: 0.75rem; color: var(--accent); margin-top: 0.15rem; cursor: pointer; font-weight: 600; }
+        .series-line:hover { text-decoration: underline; }
+        .series-siblings { border: 1px solid var(--gray-300); border-radius: 8px; padding: 0.75rem; background: rgba(16,185,129,0.06); }
+        .series-siblings h4 { margin: 0 0 0.5rem; font-size: 0.8rem; color: var(--gray-500); }
+        .series-siblings a { display: block; font-size: 0.85rem; padding: 0.2rem 0; color: var(--accent); cursor: pointer; text-decoration: none; }
+        .series-siblings a:hover { text-decoration: underline; }
+        .series-siblings .current { color: var(--gray-500); font-weight: 600; }
         .modal-form { display: flex; flex-direction: column; gap: 1rem; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
@@ -1858,6 +1865,7 @@
                         <div class="cr-card${isPaused ? ' paused' : ''}">
                             <div class="cr-card-title">${b.title}</div>
                             <div class="cr-card-author">${b.author || 'Unknown author'}</div>
+                            ${seriesLine(b)}
                             <div class="cr-card-meta">${details.join(' · ')}</div>
                             ${durationHtml}
                             <div class="cr-card-actions">${actions}</div>
@@ -1953,6 +1961,42 @@
             document.getElementById('tbrPickerSection').innerHTML = html;
         }
 
+        // ============ SERIES ============
+        function escAttr(v) { return String(v || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+        function seriesBooks(name) {
+            return books.filter(x => x.series && x.series === name)
+                .sort((a, b) => (a.series_order || 999) - (b.series_order || 999) || a.id - b.id);
+        }
+        function seriesLine(b) {
+            if (!b.series) return '';
+            const total = seriesBooks(b.series).length;
+            const part = b.series_order ? ' · #' + b.series_order + (total > 1 ? ' of ' + total : '') : '';
+            return '<div class="series-line" data-series="' + escAttr(b.series) + '" onclick="event.stopPropagation();filterBySeries(this.dataset.series)" title="Show all books in this series">&#128218; ' + escAttr(b.series) + part + '</div>';
+        }
+        function filterBySeries(name) {
+            closeEditBookModal();
+            if (currentTab !== 'books') { const tb = document.querySelector('.tab-button[onclick="switchTab(\'books\')"]'); if (tb) tb.click(); }
+            const input = document.getElementById('searchInput');
+            if (input) input.value = name;
+            currentPage.books = 1;
+            applyFilters(); renderBooksTable(); renderBooksPagination();
+        }
+        function renderSeriesSiblings(book) {
+            const box = document.getElementById('editSeriesSiblings');
+            if (!box) return;
+            const dl = document.getElementById('seriesOptions');
+            if (dl) dl.innerHTML = [...new Set(books.map(x => x.series).filter(Boolean))].sort().map(n => '<option value="' + escAttr(n) + '">').join('');
+            if (!book.series) { box.style.display = 'none'; box.innerHTML = ''; return; }
+            const list = seriesBooks(book.series);
+            let html = '<h4>Books in this series</h4>';
+            list.forEach(x => {
+                const label = (x.series_order ? '#' + x.series_order + ' ' : '') + escAttr(x.title) + ' <span style="color:var(--gray-400)">(' + (x.status || '') + ')</span>';
+                html += x.id === book.id ? '<a class="current">' + label + ' &larr; this</a>' : '<a onclick="openEditBookModal(' + x.id + ')">' + label + '</a>';
+            });
+            box.innerHTML = html;
+            box.style.display = 'block';
+        }
+
         function renderTbrCard(b) {
             const details = [];
             if (b.pages) details.push(b.pages + ' pages');
@@ -1963,6 +2007,7 @@
                 <div class="tbr-pick-card">
                     <div class="cr-card-title">${b.title}</div>
                     <div class="cr-card-author">${b.author || 'Unknown author'}</div>
+                    ${seriesLine(b)}
                     <div class="cr-card-meta">${details.join(' · ')}</div>
                     <div class="tbr-pick-actions">
                         <button class="btn-start-reading" onclick="startReading(${b.id}, this)">Start Reading</button>
@@ -2139,7 +2184,7 @@
             if (searchTerm) {
                 const words = searchTerm.split(/\s+/).filter(w => w);
                 filteredBooks = filteredBooks.filter(b => {
-                    const combined = ((b.title || '') + ' ' + (b.author || '')).toLowerCase();
+                    const combined = ((b.title || '') + ' ' + (b.author || '') + ' ' + (b.series || '')).toLowerCase();
                     return words.every(w => combined.includes(w));
                 });
             }
@@ -2223,7 +2268,7 @@
 
                     html += `
                         <tr>
-                            <td>${b.title}</td>
+                            <td>${b.title}${seriesLine(b)}</td>
                             <td>${b.author}</td>
                             <td>${renderStars(b.my_rating)}</td>
                             <td>${tagHtml}</td>
@@ -2694,6 +2739,9 @@
             document.getElementById('editBookTag').value = book.tag || '';
             document.getElementById('editBookYear').value = book.year_published || '';
             document.getElementById('editBookWordCount').value = book.word_count || '';
+            document.getElementById('editBookSeries').value = book.series || '';
+            document.getElementById('editBookSeriesOrder').value = book.series_order || '';
+            renderSeriesSiblings(book);
 
             // Convert date format from YYYY/MM/DD to YYYY-MM-DD for date input
             const dateRead = (book.date_read || '').replace(/\//g, '-');
@@ -2758,7 +2806,9 @@
                 year_published: parseInt(document.getElementById('editBookYear').value) || 0,
                 status: document.getElementById('editBookStatus').value || 'read',
                 tag: document.getElementById('editBookTag').value || null,
-                word_count: parseInt(document.getElementById('editBookWordCount').value) || 0
+                word_count: parseInt(document.getElementById('editBookWordCount').value) || 0,
+                series: document.getElementById('editBookSeries').value.trim() || null,
+                series_order: parseInt(document.getElementById('editBookSeriesOrder').value) || null
             };
 
             // Update local data
@@ -3149,6 +3199,18 @@
                     </div>
                     <div class="form-group"></div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Series</label>
+                        <input type="text" id="editBookSeries" list="seriesOptions" placeholder="e.g. The Dance of Light and Shadows">
+                        <datalist id="seriesOptions"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label>Part # in series</label>
+                        <input type="number" id="editBookSeriesOrder" min="1">
+                    </div>
+                </div>
+                <div class="series-siblings" id="editSeriesSiblings" style="display:none"></div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Word Count</label>
