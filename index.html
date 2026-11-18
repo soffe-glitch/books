@@ -339,6 +339,35 @@
         @keyframes tbrReveal { 0% { opacity: 0; transform: translateY(10px) scale(0.98); } 100% { opacity: 1; transform: none; } }
         .tbr-pick-actions { margin-top: 0.9rem; display: flex; flex-wrap: wrap; gap: 0.6rem; }
 
+        /* ============ MOODS ============ */
+        .mood-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
+        .mood-chip { font-size: 0.7rem; font-weight: 600; padding: 0.12rem 0.55rem; border-radius: var(--radius-pill); background: var(--wash); color: var(--ink-2); white-space: nowrap; }
+        .mood-chip.m-fluff { background: #fef3c7; color: #92400e; }
+        .mood-chip.m-dark_romantic { background: #ede9fe; color: #5b21b6; }
+        .mood-chip.m-dark_tragic { background: #e5e7eb; color: #1f2937; }
+        .mood-chip.m-war { background: #fee2e2; color: #991b1b; }
+        .mood-chip.m-angst { background: #dbeafe; color: #1e40af; }
+        .mood-chip.m-alternative { background: #ccfbf1; color: #115e59; }
+        .mood-chip.m-grey_hermione { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .tbr-pick-card .mood-chip { box-shadow: none; }
+
+        /* ============ DISCOVER ============ */
+        .discover-section { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-xl); padding: 1.75rem; }
+        .discover-section h3 { margin-bottom: 0.4rem; }
+        .discover-intro { color: var(--muted); font-size: 0.92rem; margin-bottom: 1.25rem; }
+        .discover-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 1rem; }
+        .discover-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+        .discover-card.is-downloaded { opacity: 0.6; border-style: dashed; box-shadow: none; }
+        .discover-reason { font-size: 0.85rem; color: var(--ink-2); }
+        .discover-prio { align-self: flex-start; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.12rem 0.55rem; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); margin-bottom: 0.25rem; }
+        .discover-prio.p-dark { background: #ede9fe; color: #5b21b6; }
+        .discover-prio.p-maybe { background: var(--wash); color: var(--ink-2); }
+        .discover-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.7rem; padding-top: 0.75rem; border-top: 1px solid var(--line); }
+        .discover-actions a, .discover-actions button { font-size: 0.82rem; font-weight: 600; padding: 0.4rem 0.85rem; border-radius: var(--radius-pill); text-decoration: none; cursor: pointer; border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink-2); }
+        .discover-actions a.dl { background: var(--emerald-ink); border-color: var(--emerald-ink); color: var(--paper); }
+        .discover-actions a:hover, .discover-actions button:hover { border-color: var(--emerald-ink); }
+        .discover-actions .muted { color: var(--muted); font-size: 0.8rem; align-self: center; }
+
         /* ============ RATING DIALOG ============ */
         .rating-dialog-overlay {
             position: fixed;
@@ -793,6 +822,7 @@
     <div class="tab-bar">
         <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
         <button class="tab-button" onclick="switchTab('books')">All Books</button>
+        <button class="tab-button" onclick="switchTab('discover')">Discover</button>
         <button class="tab-button" onclick="switchTab('stats')">Statistics</button>
     </div>
 
@@ -843,6 +873,17 @@
                             <option value="Literary Fiction">Literary Fiction</option>
                             <option value="none">No Tag</option>
                         </select>
+                        <select id="moodFilter" onchange="currentPage.books=1; applyFilters(); renderBooksTable(); renderBooksPagination();" class="select-quiet">
+                            <option value="all">All Moods</option>
+                            <option value="fluff">Fluff</option>
+                            <option value="dark_romantic">Dark &amp; romantic</option>
+                            <option value="dark_tragic">Dark &amp; tragic</option>
+                            <option value="war">War AU</option>
+                            <option value="angst">Angst</option>
+                            <option value="alternative">Alternative</option>
+                            <option value="grey_hermione">Grey Hermione</option>
+                            <option value="none">No mood set</option>
+                        </select>
                         <button class="btn-quiet" onclick="exportBackup()">Export Backup</button>
                     </div>
                 </div>
@@ -871,6 +912,11 @@
         </div>
 
         <!-- TAB 3: STATISTICS -->
+        <!-- TAB: DISCOVER -->
+        <div id="discover" class="tab-content">
+            <div class="discover-section" id="discoverSection"><div class="loading">Loading…</div></div>
+        </div>
+
         <div id="stats" class="tab-content">
             <!-- Hero: Year Tracker (full width, prominent) -->
             <div class="stats-hero" id="yearTrackerHero">
@@ -1125,6 +1171,98 @@
             if (tab === 'overview') renderOverviewTab();
             else if (tab === 'books') renderBooksTab();
             else if (tab === 'stats') renderStatsTab();
+            else if (tab === 'discover') renderDiscoverTab();
+        }
+
+        // ============ DISCOVER ============
+        let discoverItems = null;
+        const discoverFilters = { mood: 'any', prio: 'any', showDownloaded: false };
+        const PRIO_LABEL = { must: 'Must', dark: 'Dark / war', maybe: 'Maybe' };
+        function sbHeaders(extra) { return Object.assign({ 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' }, extra || {}); }
+        async function loadDiscover() {
+            const r = await fetch(SUPABASE_URL + '/rest/v1/discover?select=*&order=id', { headers: sbHeaders() });
+            if (!r.ok) throw new Error('Could not load Discover list');
+            discoverItems = await r.json();
+        }
+        function setDiscoverFilter(k, v) { discoverFilters[k] = v; renderDiscoverTab(); }
+        function aoSlug(t) { return (t || 'fic').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
+        async function renderDiscoverTab() {
+            const box = document.getElementById('discoverSection');
+            if (!discoverItems) {
+                try { await loadDiscover(); } catch (e) { box.innerHTML = '<div class="cr-empty">' + e.message + '</div>'; return; }
+            }
+            const f = discoverFilters;
+            const list = discoverItems.filter(d =>
+                (f.showDownloaded || !d.downloaded) &&
+                (f.prio === 'any' || d.priority === f.prio) &&
+                (f.mood === 'any' || (d.moods || []).includes(f.mood)));
+            let html = '<h3>Discover</h3>';
+            html += '<p class="discover-intro">Fics from the r/Dramione Top Fanfics Survey that you don\'t own yet, picked from your ratings. Not part of your TBR until you download them.</p>';
+            html += '<div class="tbr-filters">';
+            html += '<div class="tbr-filter-group"><span class="tbr-filter-label">Priority</span><div class="tbr-segmented">';
+            [['any','Any'],['must','Must'],['dark','Dark / war'],['maybe','Maybe']].forEach(([k,l]) => {
+                html += '<button class="tbr-seg' + (f.prio===k?' active':'') + '" onclick="setDiscoverFilter(\'prio\',\'' + k + '\')">' + l + '</button>';
+            });
+            html += '</div></div>';
+            html += '<div class="tbr-filter-group"><span class="tbr-filter-label">Mood</span><div class="tbr-segmented">';
+            html += '<button class="tbr-seg' + (f.mood==='any'?' active':'') + '" onclick="setDiscoverFilter(\'mood\',\'any\')">Any</button>';
+            MOODS.forEach(([k,l]) => {
+                if (discoverItems.some(d => (d.moods || []).includes(k)))
+                    html += '<button class="tbr-seg' + (f.mood===k?' active':'') + '" onclick="setDiscoverFilter(\'mood\',\'' + k + '\')">' + l + '</button>';
+            });
+            html += '</div></div>';
+            html += '<div class="tbr-filter-group"><span class="tbr-filter-label">Downloaded</span><div class="tbr-segmented">';
+            html += '<button class="tbr-seg' + (!f.showDownloaded?' active':'') + '" onclick="setDiscoverFilter(\'showDownloaded\',false)">Hide</button>';
+            html += '<button class="tbr-seg' + (f.showDownloaded?' active':'') + '" onclick="setDiscoverFilter(\'showDownloaded\',true)">Show</button>';
+            html += '</div></div></div>';
+            html += '<div class="tbr-picker-controls"><span class="tbr-count">' + list.length + ' of ' + discoverItems.filter(d => !d.downloaded).length + ' to discover</span></div>';
+            if (!list.length) html += '<div class="cr-empty">Nothing here with these filters.</div>';
+            html += '<div class="discover-list">';
+            list.forEach(d => {
+                const meta = [];
+                if (d.word_count) meta.push(d.word_count.toLocaleString() + ' words');
+                if (d.chapters) meta.push(d.complete ? 'Complete' : 'WIP · ' + d.chapters);
+                const links = d.ao3_work_id
+                    ? '<a class="dl" href="https://archiveofourown.org/downloads/' + d.ao3_work_id + '/' + aoSlug(d.title) + '.epub" target="_blank" rel="noopener">Download EPUB</a>' +
+                      '<a href="https://archiveofourown.org/works/' + d.ao3_work_id + '" target="_blank" rel="noopener">AO3</a>'
+                    : '<a href="https://archiveofourown.org/works/search?work_search%5Bquery%5D=' + encodeURIComponent(d.title + ' ' + (d.author || '')) + '" target="_blank" rel="noopener">Search AO3</a>';
+                const action = d.downloaded
+                    ? '<span class="muted">&#10003; In your library</span>'
+                    : '<button onclick="discoverToTbr(' + d.id + ', this)">Downloaded &rarr; add to TBR</button>';
+                html += '<div class="discover-card' + (d.downloaded ? ' is-downloaded' : '') + '">' +
+                    '<span class="discover-prio p-' + (d.priority || 'maybe') + '">' + (PRIO_LABEL[d.priority] || '') + '</span>' +
+                    '<div class="cr-card-title">' + escAttr(d.title) + '</div>' +
+                    '<div class="cr-card-author">' + escAttr(d.author || '') + '</div>' +
+                    (d.reason ? '<div class="discover-reason">' + escAttr(d.reason) + '</div>' : '') +
+                    '<div class="cr-card-meta">' + meta.join(' · ') + '</div>' +
+                    moodChips(d.moods) +
+                    '<div class="discover-actions">' + links + action + '</div></div>';
+            });
+            html += '</div>';
+            box.innerHTML = html;
+        }
+        async function discoverToTbr(id, btn) {
+            const d = discoverItems.find(x => x.id === id);
+            if (!d) return;
+            if (btn) btn.disabled = true;
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '/');
+            const newBook = {
+                title: d.title, author: d.author || '', my_rating: 0, avg_rating: 0,
+                pages: d.word_count ? Math.ceil(d.word_count / 250) : 0, word_count: d.word_count || 0,
+                format: 'ebook', platform: 'Apple Books', ownership: 'Owned', date_read: '', date_added: today,
+                year_published: 0, status: 'to-read', tag: 'Dramione', publisher: '', moods: d.moods || []
+            };
+            try {
+                const inserted = await supabase.insertBook(newBook);
+                books.unshift(inserted);
+                await fetch(SUPABASE_URL + '/rest/v1/discover?id=eq.' + id, { method: 'PATCH', headers: sbHeaders({ 'Prefer': 'return=minimal' }), body: JSON.stringify({ downloaded: true, added_to_books_id: inserted.id }) });
+                d.downloaded = true; d.added_to_books_id = inserted.id;
+                showToast('"' + d.title + '" added to your TBR');
+                renderDiscoverTab();
+            } catch (e) {
+                if (btn) btn.disabled = false;
+                showToast('Could not add: ' + e.message);
+            }
         }
 
         // ============ TAB 1: OVERVIEW ============
@@ -1171,6 +1309,7 @@
                             <div class="cr-card-author">${b.author || 'Unknown author'}</div>
                             ${seriesLine(b)}
                             <div class="cr-card-meta">${details.join(' · ')}</div>
+                            ${moodChips(b.moods)}
                             ${durationHtml}
                             <div class="cr-card-actions">${actions}</div>
                         </div>
@@ -1187,7 +1326,7 @@
         }
 
         let tbrPickedBook = null;
-        const tbrPickerFilters = { tag: 'any', length: 'any' };
+        const tbrPickerFilters = { tag: 'any', length: 'any', mood: 'any' };
 
         // Estimate pages: prefer pages field, else convert word_count (250 wpp), else 0
         function effectivePages(b) {
@@ -1201,6 +1340,7 @@
                 if (b.status !== 'to-read') return false;
                 if (tbrPickerFilters.tag === 'dramione' && b.tag !== 'Dramione') return false;
                 if (tbrPickerFilters.tag === 'non-dramione' && b.tag === 'Dramione') return false;
+                if (tbrPickerFilters.mood !== 'any' && !(b.moods || []).includes(tbrPickerFilters.mood)) return false;
                 if (tbrPickerFilters.length !== 'any') {
                     const pg = effectivePages(b);
                     if (tbrPickerFilters.length === 'long' && pg < 500) return false;
@@ -1245,6 +1385,15 @@
             html += '<button class="tbr-seg' + (f.length==='long'?' active':'') + '" onclick="setTbrFilter(\'length\',\'long\')">Long (500+ pg)</button>';
             html += '<button class="tbr-seg' + (f.length==='short'?' active':'') + '" onclick="setTbrFilter(\'length\',\'short\')">Short (&lt;500 pg)</button>';
             html += '</div></div>';
+
+            html += '<div class="tbr-filter-group">';
+            html += '<span class="tbr-filter-label">Mood</span>';
+            html += '<div class="tbr-segmented">';
+            html += '<button class="tbr-seg' + (f.mood==='any'?' active':'') + '" onclick="setTbrFilter(\'mood\',\'any\')">Any</button>';
+            MOODS.forEach(([k, label]) => {
+                html += '<button class="tbr-seg' + (f.mood===k?' active':'') + '" onclick="setTbrFilter(\'mood\',\'' + k + '\')">' + label + '</button>';
+            });
+            html += '</div></div>';
             html += '</div>';
 
             // Pick controls
@@ -1263,6 +1412,18 @@
             html += '</div>';
 
             document.getElementById('tbrPickerSection').innerHTML = html;
+        }
+
+        // ============ MOODS ============
+        const MOODS = [
+            ['fluff', 'Fluff'], ['dark_romantic', 'Dark & romantic'], ['dark_tragic', 'Dark & tragic'],
+            ['war', 'War AU'], ['angst', 'Angst'], ['alternative', 'Alternative'], ['grey_hermione', 'Grey Hermione']
+        ];
+        const MOOD_LABEL = Object.fromEntries(MOODS);
+        function moodChips(list) {
+            const m = (list || []).filter(x => MOOD_LABEL[x]);
+            if (!m.length) return '';
+            return '<div class="mood-chips">' + m.map(x => '<span class="mood-chip m-' + x + '">' + MOOD_LABEL[x] + '</span>').join('') + '</div>';
         }
 
         // ============ SERIES ============
@@ -1313,6 +1474,7 @@
                     <div class="cr-card-author">${b.author || 'Unknown author'}</div>
                     ${seriesLine(b)}
                     <div class="cr-card-meta">${details.join(' · ')}</div>
+                    ${moodChips(b.moods)}
                     <div class="tbr-pick-actions">
                         <button class="btn-start-reading" onclick="startReading(${b.id}, this)">Start Reading</button>
                         <button class="btn-pick-again" onclick="pickRandomTbr()">Pick another</button>
@@ -1522,6 +1684,10 @@
             } else if (quickFilter === 'dnf') {
                 filteredBooks = filteredBooks.filter(b => b.status === 'dnf');
             }
+
+            const moodFilter = document.getElementById('moodFilter')?.value || 'all';
+            if (moodFilter === 'none') filteredBooks = filteredBooks.filter(b => !(b.moods || []).length);
+            else if (moodFilter !== 'all') filteredBooks = filteredBooks.filter(b => (b.moods || []).includes(moodFilter));
 
             const tagFilter = document.getElementById('tagFilter')?.value || 'all';
             if (tagFilter === 'none') {
@@ -2045,6 +2211,7 @@
             document.getElementById('editBookWordCount').value = book.word_count || '';
             document.getElementById('editBookSeries').value = book.series || '';
             document.getElementById('editBookSeriesOrder').value = book.series_order || '';
+            document.querySelectorAll('#editBookMoods input[type="checkbox"]').forEach(cb => { cb.checked = (book.moods || []).includes(cb.value); });
             renderSeriesSiblings(book);
 
             // Convert date format from YYYY/MM/DD to YYYY-MM-DD for date input
@@ -2112,7 +2279,8 @@
                 tag: document.getElementById('editBookTag').value || null,
                 word_count: parseInt(document.getElementById('editBookWordCount').value) || 0,
                 series: document.getElementById('editBookSeries').value.trim() || null,
-                series_order: parseInt(document.getElementById('editBookSeriesOrder').value) || null
+                series_order: parseFloat(document.getElementById('editBookSeriesOrder').value) || null,
+                moods: Array.from(document.querySelectorAll('#editBookMoods input:checked')).map(c => c.value)
             };
 
             // Update local data
@@ -2511,10 +2679,22 @@
                     </div>
                     <div class="form-group">
                         <label>Part # in series</label>
-                        <input type="number" id="editBookSeriesOrder" min="1">
+                        <input type="number" id="editBookSeriesOrder" min="0" step="any">
                     </div>
                 </div>
                 <div class="series-siblings" id="editSeriesSiblings" style="display:none"></div>
+                <div class="form-group">
+                    <label>Mood</label>
+                    <div class="platform-checks" id="editBookMoods">
+                        <label><input type="checkbox" value="fluff"> Fluff</label>
+                        <label><input type="checkbox" value="dark_romantic"> Dark &amp; romantic</label>
+                        <label><input type="checkbox" value="dark_tragic"> Dark &amp; tragic</label>
+                        <label><input type="checkbox" value="war"> War AU</label>
+                        <label><input type="checkbox" value="angst"> Angst</label>
+                        <label><input type="checkbox" value="alternative"> Alternative</label>
+                        <label><input type="checkbox" value="grey_hermione"> Grey Hermione</label>
+                    </div>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Word Count</label>
