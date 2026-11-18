@@ -350,6 +350,9 @@
         .mood-chip.m-alternative { background: #ccfbf1; color: #115e59; }
         .mood-chip.m-grey_hermione { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
         .tbr-pick-card .mood-chip { box-shadow: none; }
+        .trope-line { font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+        .tbr-pick-card .trope-line { color: var(--sage-on-forest); }
+        .tbr-filter-group.wide { flex-basis: 100%; }
 
         /* ============ DISCOVER ============ */
         .discover-section { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-xl); padding: 1.75rem; }
@@ -884,6 +887,28 @@
                             <option value="grey_hermione">Grey Hermione</option>
                             <option value="none">No mood set</option>
                         </select>
+                        <select id="tropeFilter" onchange="currentPage.books=1; applyFilters(); renderBooksTable(); renderBooksPagination();" class="select-quiet">
+                            <option value="all">All Tropes</option>
+                            <option value="slow_burn">Slow burn</option>
+                            <option value="enemies_to_lovers">Enemies to lovers</option>
+                            <option value="pining_draco">Pining Draco</option>
+                            <option value="possessive_draco">Possessive Draco</option>
+                            <option value="death_eater_draco">Death Eater Draco</option>
+                            <option value="bamf_hermione">BAMF Hermione</option>
+                            <option value="slytherin_hermione">Slytherin / Pureblood Hermione</option>
+                            <option value="marriage_law">Marriage law</option>
+                            <option value="forced_proximity">Forced proximity</option>
+                            <option value="soulmates">Soulmates / bonds</option>
+                            <option value="time_travel">Time travel</option>
+                            <option value="muggle_au">Muggle AU</option>
+                            <option value="creature">Veela / creature</option>
+                            <option value="mystery">Mystery</option>
+                            <option value="workplace">Workplace</option>
+                            <option value="pureblood_politics">Pureblood politics</option>
+                            <option value="parenting">Pregnancy / parenting</option>
+                            <option value="hogwarts_era">Hogwarts era</option>
+                            <option value="post_war">Post-war</option>
+                        </select>
                         <button class="btn-quiet" onclick="exportBackup()">Export Backup</button>
                     </div>
                 </div>
@@ -1310,6 +1335,7 @@
                             ${seriesLine(b)}
                             <div class="cr-card-meta">${details.join(' · ')}</div>
                             ${moodChips(b.moods)}
+                            ${tropeLine(b.tropes)}
                             ${durationHtml}
                             <div class="cr-card-actions">${actions}</div>
                         </div>
@@ -1326,7 +1352,7 @@
         }
 
         let tbrPickedBook = null;
-        const tbrPickerFilters = { tag: 'any', length: 'any', mood: 'any' };
+        const tbrPickerFilters = { tag: 'any', length: 'any', mood: 'any', trope: 'any' };
 
         // Estimate pages: prefer pages field, else convert word_count (250 wpp), else 0
         function effectivePages(b) {
@@ -1341,6 +1367,7 @@
                 if (tbrPickerFilters.tag === 'dramione' && b.tag !== 'Dramione') return false;
                 if (tbrPickerFilters.tag === 'non-dramione' && b.tag === 'Dramione') return false;
                 if (tbrPickerFilters.mood !== 'any' && !(b.moods || []).includes(tbrPickerFilters.mood)) return false;
+                if (tbrPickerFilters.trope !== 'any' && !(b.tropes || []).includes(tbrPickerFilters.trope)) return false;
                 if (tbrPickerFilters.length !== 'any') {
                     const pg = effectivePages(b);
                     if (tbrPickerFilters.length === 'long' && pg < 500) return false;
@@ -1394,6 +1421,15 @@
                 html += '<button class="tbr-seg' + (f.mood===k?' active':'') + '" onclick="setTbrFilter(\'mood\',\'' + k + '\')">' + label + '</button>';
             });
             html += '</div></div>';
+
+            html += '<div class="tbr-filter-group wide">';
+            html += '<span class="tbr-filter-label">Trope</span>';
+            html += '<div class="tbr-segmented">';
+            html += '<button class="tbr-seg' + (f.trope==='any'?' active':'') + '" onclick="setTbrFilter(\'trope\',\'any\')">Any</button>';
+            TROPES.forEach(([k, label]) => {
+                html += '<button class="tbr-seg' + (f.trope===k?' active':'') + '" onclick="setTbrFilter(\'trope\',\'' + k + '\')">' + label + '</button>';
+            });
+            html += '</div></div>';
             html += '</div>';
 
             // Pick controls
@@ -1420,6 +1456,32 @@
             ['war', 'War AU'], ['angst', 'Angst'], ['alternative', 'Alternative'], ['grey_hermione', 'Grey Hermione']
         ];
         const MOOD_LABEL = Object.fromEntries(MOODS);
+        const TROPES = [
+            ['slow_burn', 'Slow burn'],
+            ['enemies_to_lovers', 'Enemies to lovers'],
+            ['pining_draco', 'Pining Draco'],
+            ['possessive_draco', 'Possessive Draco'],
+            ['death_eater_draco', 'Death Eater Draco'],
+            ['bamf_hermione', 'BAMF Hermione'],
+            ['slytherin_hermione', 'Slytherin / Pureblood Hermione'],
+            ['marriage_law', 'Marriage law'],
+            ['forced_proximity', 'Forced proximity'],
+            ['soulmates', 'Soulmates / bonds'],
+            ['time_travel', 'Time travel'],
+            ['muggle_au', 'Muggle AU'],
+            ['creature', 'Veela / creature'],
+            ['mystery', 'Mystery'],
+            ['workplace', 'Workplace'],
+            ['pureblood_politics', 'Pureblood politics'],
+            ['parenting', 'Pregnancy / parenting'],
+            ['hogwarts_era', 'Hogwarts era'],
+            ['post_war', 'Post-war']
+        ];
+        const TROPE_LABEL = Object.fromEntries(TROPES);
+        function tropeLine(list) {
+            const t = (list || []).filter(x => TROPE_LABEL[x]).map(x => TROPE_LABEL[x]);
+            return t.length ? '<div class="trope-line">' + t.join(' · ') + '</div>' : '';
+        }
         function moodChips(list) {
             const m = (list || []).filter(x => MOOD_LABEL[x]);
             if (!m.length) return '';
@@ -1475,6 +1537,7 @@
                     ${seriesLine(b)}
                     <div class="cr-card-meta">${details.join(' · ')}</div>
                     ${moodChips(b.moods)}
+                    ${tropeLine(b.tropes)}
                     <div class="tbr-pick-actions">
                         <button class="btn-start-reading" onclick="startReading(${b.id}, this)">Start Reading</button>
                         <button class="btn-pick-again" onclick="pickRandomTbr()">Pick another</button>
@@ -1688,6 +1751,9 @@
             const moodFilter = document.getElementById('moodFilter')?.value || 'all';
             if (moodFilter === 'none') filteredBooks = filteredBooks.filter(b => !(b.moods || []).length);
             else if (moodFilter !== 'all') filteredBooks = filteredBooks.filter(b => (b.moods || []).includes(moodFilter));
+
+            const tropeFilter = document.getElementById('tropeFilter')?.value || 'all';
+            if (tropeFilter !== 'all') filteredBooks = filteredBooks.filter(b => (b.tropes || []).includes(tropeFilter));
 
             const tagFilter = document.getElementById('tagFilter')?.value || 'all';
             if (tagFilter === 'none') {
@@ -2212,6 +2278,7 @@
             document.getElementById('editBookSeries').value = book.series || '';
             document.getElementById('editBookSeriesOrder').value = book.series_order || '';
             document.querySelectorAll('#editBookMoods input[type="checkbox"]').forEach(cb => { cb.checked = (book.moods || []).includes(cb.value); });
+            document.querySelectorAll('#editBookTropes input[type="checkbox"]').forEach(cb => { cb.checked = (book.tropes || []).includes(cb.value); });
             renderSeriesSiblings(book);
 
             // Convert date format from YYYY/MM/DD to YYYY-MM-DD for date input
@@ -2280,7 +2347,8 @@
                 word_count: parseInt(document.getElementById('editBookWordCount').value) || 0,
                 series: document.getElementById('editBookSeries').value.trim() || null,
                 series_order: parseFloat(document.getElementById('editBookSeriesOrder').value) || null,
-                moods: Array.from(document.querySelectorAll('#editBookMoods input:checked')).map(c => c.value)
+                moods: Array.from(document.querySelectorAll('#editBookMoods input:checked')).map(c => c.value),
+                tropes: Array.from(document.querySelectorAll('#editBookTropes input:checked')).map(c => c.value)
             };
 
             // Update local data
@@ -2693,6 +2761,30 @@
                         <label><input type="checkbox" value="angst"> Angst</label>
                         <label><input type="checkbox" value="alternative"> Alternative</label>
                         <label><input type="checkbox" value="grey_hermione"> Grey Hermione</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tropes</label>
+                    <div class="platform-checks" id="editBookTropes">
+                        <label><input type="checkbox" value="slow_burn"> Slow burn</label>
+                        <label><input type="checkbox" value="enemies_to_lovers"> Enemies to lovers</label>
+                        <label><input type="checkbox" value="pining_draco"> Pining Draco</label>
+                        <label><input type="checkbox" value="possessive_draco"> Possessive Draco</label>
+                        <label><input type="checkbox" value="death_eater_draco"> Death Eater Draco</label>
+                        <label><input type="checkbox" value="bamf_hermione"> BAMF Hermione</label>
+                        <label><input type="checkbox" value="slytherin_hermione"> Slytherin / Pureblood Hermione</label>
+                        <label><input type="checkbox" value="marriage_law"> Marriage law</label>
+                        <label><input type="checkbox" value="forced_proximity"> Forced proximity</label>
+                        <label><input type="checkbox" value="soulmates"> Soulmates / bonds</label>
+                        <label><input type="checkbox" value="time_travel"> Time travel</label>
+                        <label><input type="checkbox" value="muggle_au"> Muggle AU</label>
+                        <label><input type="checkbox" value="creature"> Veela / creature</label>
+                        <label><input type="checkbox" value="mystery"> Mystery</label>
+                        <label><input type="checkbox" value="workplace"> Workplace</label>
+                        <label><input type="checkbox" value="pureblood_politics"> Pureblood politics</label>
+                        <label><input type="checkbox" value="parenting"> Pregnancy / parenting</label>
+                        <label><input type="checkbox" value="hogwarts_era"> Hogwarts era</label>
+                        <label><input type="checkbox" value="post_war"> Post-war</label>
                     </div>
                 </div>
                 <div class="form-row">
