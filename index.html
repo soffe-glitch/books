@@ -365,6 +365,7 @@
         .discover-prio { align-self: flex-start; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.12rem 0.55rem; border-radius: var(--radius-pill); background: var(--mint); color: var(--forest); margin-bottom: 0.25rem; }
         .discover-prio.p-dark { background: #ede9fe; color: #5b21b6; }
         .discover-prio.p-maybe { background: var(--wash); color: var(--ink-2); }
+        .discover-prio.p-watch { background: #fef3c7; color: #92400e; }
         .discover-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.7rem; padding-top: 0.75rem; border-top: 1px solid var(--line); }
         .discover-actions a, .discover-actions button { font-size: 0.82rem; font-weight: 600; padding: 0.4rem 0.85rem; border-radius: var(--radius-pill); text-decoration: none; cursor: pointer; border: 1px solid var(--line-strong); background: var(--paper); color: var(--ink-2); }
         .discover-actions a.dl { background: var(--emerald-ink); border-color: var(--emerald-ink); color: var(--paper); }
@@ -1202,7 +1203,7 @@
         // ============ DISCOVER ============
         let discoverItems = null;
         const discoverFilters = { mood: 'any', prio: 'any', showDownloaded: false };
-        const PRIO_LABEL = { must: 'Must', dark: 'Dark / war', maybe: 'Maybe' };
+        const PRIO_LABEL = { must: 'Must', dark: 'Dark / war', maybe: 'Maybe', watch: 'Keep an eye' };
         function sbHeaders(extra) { return Object.assign({ 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' }, extra || {}); }
         async function loadDiscover() {
             const r = await fetch(SUPABASE_URL + '/rest/v1/discover?select=*&order=id', { headers: sbHeaders() });
@@ -1225,7 +1226,7 @@
             html += '<p class="discover-intro">Fics from the r/Dramione Top Fanfics Survey that you don\'t own yet, picked from your ratings. Not part of your TBR until you download them.</p>';
             html += '<div class="tbr-filters">';
             html += '<div class="tbr-filter-group"><span class="tbr-filter-label">Priority</span><div class="tbr-segmented">';
-            [['any','Any'],['must','Must'],['dark','Dark / war'],['maybe','Maybe']].forEach(([k,l]) => {
+            [['any','Any'],['must','Must'],['dark','Dark / war'],['maybe','Maybe'],['watch','Keep an eye']].forEach(([k,l]) => {
                 html += '<button class="tbr-seg' + (f.prio===k?' active':'') + '" onclick="setDiscoverFilter(\'prio\',\'' + k + '\')">' + l + '</button>';
             });
             html += '</div></div>';
